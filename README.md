@@ -1,5 +1,7 @@
 <p align="center">
-  <h1 align="center">{Crimson}</h1>
+  <a href="https://github.com/simc/crimson">
+    <img src="https://raw.githubusercontent.com/simc/crimson/main/.github/crimson.svg?sanitize=true" width="350">
+  </a>
 </p>
 
 <p align="center">
@@ -17,7 +19,7 @@
   </a>
 </p>
 
-Fast, efficient and easy-to-use JSON parser and serializer for Dart.
+<p align="center">Fast, efficient and easy-to-use JSON parser and serializer for Dart.</p>
 
 > 🚧 **Crimson is still in early development and is not ready for production use. <br> Only parsing is supported for now** 🚧
 

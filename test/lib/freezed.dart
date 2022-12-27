@@ -10,7 +10,6 @@ part 'freezed.freezed.dart';
 @freezed
 class TestObject with _$TestObject {
   @json
-  @JsonSerializable()
   const factory TestObject({
     required String name,
     required int age,
