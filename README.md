@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://github.com/simc/crimson">
-    <img src="https://raw.githubusercontent.com/simc/crimson/main/.github/crimson.svg?sanitize=true" width="350">
+    <img src="https://raw.githubusercontent.com/simc/crimson/main/.github/crimson.svg" width="350">
   </a>
 </p>
 
