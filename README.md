@@ -1,8 +1,8 @@
-<p align="center">
+<h1 align="center">
   <a href="https://github.com/simc/crimson">
     <img src="https://raw.githubusercontent.com/simc/crimson/main/.github/crimson.svg" width="350">
   </a>
-</p>
+</h1>
 
 <p align="center">
   <a href="https://pub.dev/packages/crimson">
