@@ -7,7 +7,7 @@ import 'package:test/test.dart';
 
 void main() {
   group('json.org', () {
-    final files = Directory('test/json_org').listSync();
+    final files = Directory('json_org').listSync();
     for (final file in files) {
       if (file is File) {
         test(file.path.split('/').last, () {
@@ -18,7 +18,7 @@ void main() {
   });
 
   group('test_suite', () {
-    final files = Directory('test/test_suite').listSync();
+    final files = Directory('test_suite').listSync();
     for (final file in files) {
       if (file is File) {
         test(file.path.split('/').last, () {

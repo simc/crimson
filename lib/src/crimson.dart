@@ -82,7 +82,7 @@ class Crimson {
 
   void _skipString() {
     var escaped = false;
-    for (var i = _head; i < _tail; i++) {
+    for (var i = _head;; i++) {
       final c = buffer[i];
       if (c == tokenDoubleQuote) {
         if (!escaped) {
@@ -108,7 +108,6 @@ class Crimson {
         escaped = true;
       }
     }
-    _error(_head - 1, expected: '"');
   }
 
   void _skipNumber() {
@@ -201,47 +200,51 @@ class Crimson {
     return number * sign;
   }
 
-  /// Reads a number value. This method always returns an [int] value for whole
-  /// numbers, and a [double] value for numbers with a fractional part.
-  num readNum() {
+  /// Reads an integer value.
+  @pragma('vm:prefer-inline')
+  int readInt() {
     final start = _head;
-    final number = _tryReadInt();
+    return _tryReadInt() ?? _readDoubleSlowPath(start).toInt();
+  }
+
+  /// Reads a double value.
+  double readDouble() {
+    final start = _head;
+    var number = _tryReadInt()?.toDouble();
     if (number == null) {
-      return _readNumSlowPath(start);
+      return _readDoubleSlowPath(start);
     }
 
-    if (_head == _tail) {
-      return number;
-    }
-
-    double? doubleNumber;
     if (buffer[_head] == tokenPeriod) {
       _head++;
       final decimalStart = _head;
       final decimal = _tryReadInt();
       if (decimal == null) {
-        return _readNumSlowPath(start);
+        return _readDoubleSlowPath(start);
       }
-      doubleNumber = number + decimal / pow(10, _head - decimalStart);
-      if (_head == _tail) {
-        return doubleNumber;
-      }
+      number += decimal / pow(10, _head - decimalStart);
     }
 
-    if (_head != _tail) {
-      final nextToken = buffer[_head];
-      if (nextToken == tokenE || nextToken == tokenUpperE) {
-        return _readNumSlowPath(start);
-      }
+    final nextToken = buffer[_head];
+    if (nextToken == tokenE || nextToken == tokenUpperE) {
+      return _readDoubleSlowPath(start);
     }
 
-    return doubleNumber ?? number;
+    return number;
   }
 
-  num _readNumSlowPath(int start) {
+  @pragma('vm:prefer-inline')
+  double _readDoubleSlowPath(int start) {
     _skipNumber();
     final string = String.fromCharCodes(buffer, start, _head);
-    final number = double.parse(string);
+    return double.parse(string);
+  }
+
+  /// Reads a numerical value. If the value has a fractional part, it is
+  /// returned as a [double]. Otherwise, it is returned as an [int].
+  @pragma('vm:prefer-inline')
+  num readNum() {
+    final number = readDouble();
     if (number % 1 == 0) {
       return number.toInt();
     } else {

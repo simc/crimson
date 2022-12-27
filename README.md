@@ -1,4 +1,6 @@
-<center><h1>Crimson</h1></center>
+<p align="center">
+  <h1 align="center">{Crimson}</h1>
+</p>
 
 <p align="center">
   <a href="https://pub.dev/packages/crimson">
@@ -24,6 +26,7 @@ Fast, efficient and easy-to-use JSON parser and serializer for Dart.
 - 🏎️ **Fast**: Like really fast. Crimson parses JSON in a single pass.
 - 🌻 **Easy to use**: Crimson is designed to be easy to use and understand.
 - 💃 **Flexible**: Crimson can partially parse and serialize JSON.
+- 🥶 **Freezed support**: Crimson supports [freezed](https://pub.dev/packages/freezed) classes.
 - 🪶 **Lightweight**: Crimson is lightweight and has no third-party dependencies.
 
 ## Usage
@@ -64,6 +67,29 @@ void main() {
 ```
 
 That's it! You can now parse and serialize JSON with ease.
+
+## Freezed Support
+
+Crimson supports classes annotated with `@freezed` from the [freezed](https://pub.dev/packages/freezed) package.
+
+```dart
+import 'package:crimson/crimson.dart';
+
+part 'tweet.g.dart';
+part 'tweet.freezed.dart';
+
+@freezed
+class Tweet with _$Tweet {
+  @json
+  const factory Tweet({
+    DateTime? created_at,
+    @JsonField(name: 'text') String? tweet,
+    int? reply_count,
+    int? retweet_count,
+    int? favorite_count,
+  }) = _Tweet;
+}
+```
 
 ### License
 

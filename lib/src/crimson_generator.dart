@@ -38,7 +38,8 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
       for (final param in defaultContstructor.parameters) param.name: param
     };
 
-    final cls = element.displayName;
+    // hack to fix freezed names
+    final cls = element.displayName.replaceFirst(r'_$_', '');
     var code = '''
     extension Read$cls on Crimson {
       $cls read$cls() {''';
@@ -93,10 +94,9 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
     code += ');';
 
     for (final accessor in accessors) {
-      if (params.containsKey(accessor.name)) {
-        continue;
+      if (!params.containsKey(accessor.name) && accessor.setter != null) {
+        code += 'obj.${accessor.name} = ${accessor.name};';
       }
-      code += 'obj.${accessor.name} = ${accessor.name};';
     }
 
     code += '';
@@ -117,7 +117,7 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
       List<$cls?> read${cls}OrNullList() {
         final list = <$cls?>[];
         while(iterList()) {
-          list.add(isNull() ? readNull() : read$cls());
+          list.add(this.isNull() ? readNull() : read$cls());
         }
         return list;
       }
@@ -180,7 +180,7 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
       List<$cls?> read${cls}OrNullList() {
         final list = <$cls?>[];
         while(iterList()) {
-          list.add(isNull() ? readNull() : read$cls());
+          list.add(this.isNull() ? readNull() : read$cls());
         }
         return list;
       }
@@ -190,7 +190,7 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
   String _read(DartType type) {
     var code = '';
     if (!type.isDynamic && !type.isDartCoreBool && type.isNullable) {
-      code += 'isNull() ? readNull() : ';
+      code += 'this.isNull() ? readNull() : ';
     }
     if (type.isDartCoreList) {
       code += '''
@@ -205,9 +205,9 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
           field: ${_read(type.mapParam)},
       }''';
     } else if (type.isDartCoreDouble) {
-      code += 'readNum().toDouble()';
+      code += 'readDouble()';
     } else if (type.isDartCoreInt) {
-      code += 'readNum().toInt()';
+      code += 'readInt()';
     } else if (type.isDartCoreNum) {
       code += 'readNum()';
     } else if (type.isDartCoreString) {
@@ -280,7 +280,12 @@ extension on PropertyInducingElement {
 
   bool get jsonIgnore {
     final ann = _fieldChecker.firstAnnotationOfExact(nonSynthetic);
-    return ann?.getField('ignore')?.toBoolValue() ?? false;
+    final ignore = ann?.getField('ignore')?.toBoolValue() ?? false;
+    if (ignore) {
+      return true;
+    }
+
+    return {'hashCode', 'runtimeType', 'copyWith'}.contains(name);
   }
 
   ExecutableElement? get jsonFromJson {
