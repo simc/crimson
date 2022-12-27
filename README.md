@@ -1,4 +1,4 @@
-# Crimson
+<center><h1>Crimson</h1></center>
 
 <p align="center">
   <a href="https://pub.dev/packages/crimson">
