@@ -1,0 +1,17 @@
+name: crimson
+description: Fast, efficient and easy-to-use JSON parser and serializer for Dart.
+repository: https://github.com/simc/crimson
+version: 0.0.2
+
+environment:
+  sdk: ">=2.18.4 <3.0.0"
+
+dependencies:
+  analyzer: ^5.3.1
+  build: ^2.3.1
+  meta: ^1.8.0
+  source_gen: ^1.2.6
+
+dev_dependencies:
+  test: ^1.16.0
+  very_good_analysis: ^3.1.0

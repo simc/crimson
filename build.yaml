@@ -1,0 +1,8 @@
+builders:
+  crimson:
+    import: "package:crimson/generator.dart"
+    builder_factories: ["getCrimsonGenerator"]
+    build_extensions: { ".dart": ["crimson.g.part"] }
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]

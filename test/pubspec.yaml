@@ -1,0 +1,12 @@
+name: bench
+
+environment:
+  sdk: ">=2.18.4 <3.0.0"
+
+dependencies:
+  crimson:
+    path: ../
+  intl: ^0.17.0
+  json_serializable: ^6.5.4
+  build_runner: ^2.1.4
+  test: ^1.22.1
