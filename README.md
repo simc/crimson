@@ -17,7 +17,7 @@
 
 Fast, efficient and easy-to-use JSON parser and serializer for Dart.
 
-> 🚧 **Crimson is still in early development and is not ready for production use. Only parsing is supported for now** 🚧
+> 🚧 **Crimson is still in early development and is not ready for production use. <br> Only parsing is supported for now** 🚧
 
 ## Features
 
