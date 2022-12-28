@@ -25,11 +25,12 @@ jobs:
       - uses: actions/checkout@v3
       - uses: dart-lang/setup-dart@v1.3
       - run: dart pub get
-      - name: Lint
-        run: |
+      - run: |
           dart pub get
           dart pub run build_runner build
-          dart analyze --fatal-infos
+        working-directory: crimson_test
+      - name: Lint
+        run: dart analyze --fatal-infos
 
   test:
     name: Unit Tests
