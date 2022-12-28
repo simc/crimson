@@ -26,7 +26,10 @@ jobs:
       - uses: dart-lang/setup-dart@v1.3
       - run: dart pub get
       - name: Lint
-        run: dart analyze --fatal-infos
+        run: |
+          dart pub get
+          dart pub run build_runner build
+          dart analyze --fatal-infos
 
   test:
     name: Unit Tests
