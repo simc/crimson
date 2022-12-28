@@ -33,14 +33,14 @@
 
 ## Usage
 
-After adding Crimson to your `pubspec.yaml`, you can start annotating your classes with `@json` and optionally `@JsonField`:
+After adding Crimson to your `pubspec.yaml`, you can start annotating your classes with `@Json()` and optionally `@JsonField()`:
 
 ```dart
 import 'package:crimson/crimson.dart';
 
 part 'tweet.g.dart';
 
-@json
+@Json()
 class Tweet {
   DateTime? created_at;
 
@@ -82,7 +82,7 @@ part 'tweet.freezed.dart';
 
 @freezed
 class Tweet with _$Tweet {
-  @json
+  @Json()
   const factory Tweet({
     DateTime? created_at,
     @JsonField(name: 'text') String? tweet,

@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:crimson/crimson.dart' hide json;
+import 'package:crimson/crimson.dart';
 
 import 'twitter/tweet.dart';
 

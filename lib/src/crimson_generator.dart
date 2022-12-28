@@ -5,11 +5,9 @@ import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
 import 'package:crimson/crimson.dart';
-import 'package:crimson/src/annotations.dart';
 import 'package:source_gen/source_gen.dart';
 
 const TypeChecker _fieldChecker = TypeChecker.fromRuntime(JsonField);
-const TypeChecker _enumChecker = TypeChecker.fromRuntime(JsonEnum);
 
 /// @nodoc
 class CrimsonGenerator extends GeneratorForAnnotation<Json> {
@@ -22,7 +20,9 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
     if (element is ClassElement) {
       return _generateClassDecode(element);
     } else if (element is EnumElement) {
-      return _generateEnumDecode(element);
+      final field = annotation.read('enumField');
+      final enumProperty = field.isNull ? 'name' : field.stringValue;
+      return _generateEnumDecode(element, enumProperty);
     } else {
       throw UnimplementedError();
     }
@@ -124,10 +124,9 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
     }''';
   }
 
-  String _generateEnumDecode(EnumElement enumClass) {
+  String _generateEnumDecode(EnumElement enumClass, String propertyName) {
     final enumElements =
         enumClass.fields.where((f) => f.isEnumConstant).toList();
-    final propertyName = enumClass.jsonEnumField;
     final valueMap = <String, dynamic>{};
 
     if (propertyName == 'name') {
@@ -240,13 +239,6 @@ extension on ClassElement {
               accessorNames.add(e.name),
         )
         .toList();
-  }
-}
-
-extension on EnumElement {
-  String get jsonEnumField {
-    final ann = _enumChecker.firstAnnotationOfExact(this);
-    return ann?.getField('field')?.toStringValue() ?? 'name';
   }
 }
 

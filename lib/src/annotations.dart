@@ -1,14 +1,17 @@
 import 'package:meta/meta_meta.dart';
 
 /// Annotation for classes to generate Crimson converters.
-@Target({TargetKind.classType})
+@Target({TargetKind.classType, TargetKind.enumType})
 class Json {
   /// Annotation for classes to generate Crimson converters.
-  const Json();
-}
+  const Json({this.enumField});
 
-/// Annotation for classes to generate Crimson converters.
-const json = Json();
+  /// The name of the field to use for enum classes.
+  ///
+  /// Defaults to `name`. You can also `index` to use the enum ordinal or a
+  /// custom field.
+  final String? enumField;
+}
 
 /// Annotation for fields to customize the JSON field name or to ignore it.
 @Target({TargetKind.field, TargetKind.getter, TargetKind.setter})
@@ -28,17 +31,4 @@ class JsonField {
 
   /// Whether to ignore this field.
   final bool ignore;
-}
-
-/// Annotation for enum classes to generate Crimson enum converters.
-@Target({TargetKind.enumType})
-class JsonEnum {
-  /// Annotation for enum classes to generate Crimson enum converters.
-  const JsonEnum({this.field = 'name'});
-
-  /// The name of the field to use for the enum value.
-  ///
-  /// Defaults to `name`. You can also `index` to use the enum ordinal or a
-  /// custom field.
-  final String field;
 }

@@ -1,6 +1,5 @@
 // ignore_for_file: avoid_js_rounded_ints
 
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:crimson/src/consts.dart';
@@ -177,78 +176,113 @@ class Crimson {
     _error(_head - 1, expected: '}');
   }
 
-  int? _tryReadInt() {
+  /// Reads an [int] value.
+  int readInt() {
     var i = _head;
     var sign = 1;
     if (buffer[i] == tokenMinus) {
-      i++;
       sign = -1;
+      i++;
     }
 
-    var number = 0;
+    var value = 0;
     while (true) {
-      final c = buffer[i++];
-      final digit = c ^ tokenZero;
+      final digit = buffer[i++] ^ tokenZero;
       if (digit <= 9) {
-        number = number * 10 + digit;
+        value = 10 * value + digit;
       } else {
         break;
       }
     }
 
     _head = i - 1;
-    return number * sign;
+    return sign * value;
   }
 
-  /// Reads an integer value.
+  /// Reads a [double] value.
   @pragma('vm:prefer-inline')
-  int readInt() {
-    final start = _head;
-    return _tryReadInt() ?? _readDoubleSlowPath(start).toInt();
-  }
-
-  /// Reads a double value.
   double readDouble() {
-    final start = _head;
-    var number = _tryReadInt()?.toDouble();
-    if (number == null) {
-      return _readDoubleSlowPath(start);
-    }
-
-    if (buffer[_head] == tokenPeriod) {
-      _head++;
-      final decimalStart = _head;
-      final decimal = _tryReadInt();
-      if (decimal == null) {
-        return _readDoubleSlowPath(start);
-      }
-      number += decimal / pow(10, _head - decimalStart);
-    }
-
-    final nextToken = buffer[_head];
-    if (nextToken == tokenE || nextToken == tokenUpperE) {
-      return _readDoubleSlowPath(start);
-    }
-
-    return number;
+    return readNum().toDouble();
   }
 
-  @pragma('vm:prefer-inline')
-  double _readDoubleSlowPath(int start) {
-    _skipNumber();
-    final string = String.fromCharCodes(buffer, start, _head);
-    return double.parse(string);
-  }
-
-  /// Reads a numerical value. If the value has a fractional part, it is
-  /// returned as a [double]. Otherwise, it is returned as an [int].
-  @pragma('vm:prefer-inline')
+  /// Reads a numerical value. If the value has a fractional part or is too big,
+  /// it is returned as a [double]. Otherwise, it is returned as an [int].
   num readNum() {
-    final number = readDouble();
-    if (number % 1 == 0) {
-      return number.toInt();
+    final start = _head;
+    final number = _tryReadNum();
+    if (number == null) {
+      final string = String.fromCharCodes(buffer, start, _head);
+      return num.parse(string);
     } else {
       return number;
+    }
+  }
+
+  num? _tryReadNum() {
+    var i = _head;
+    var exponent = 0;
+    // Added to exponent for each digit. Set to -1 when seeing '.'.
+    var exponentDelta = 0;
+    var doubleValue = 0.0;
+    var sign = 1.0;
+
+    if (buffer[i] == tokenMinus) {
+      sign = -1.0;
+      i++;
+    }
+
+    while (true) {
+      final c = buffer[i++];
+      final digit = c ^ tokenZero;
+      if (digit <= 9) {
+        doubleValue = 10.0 * doubleValue + digit;
+        exponent += exponentDelta;
+      } else if (c == tokenPeriod && exponentDelta == 0) {
+        exponentDelta = -1;
+      } else if (c == tokenE || c == tokenUpperE) {
+        var expValue = 0;
+        var expSign = 1;
+        if (buffer[i] == tokenMinus) {
+          expSign = -1;
+          i++;
+        } else if (buffer[i] == tokenPlus) {
+          i++;
+        }
+        while (true) {
+          final c = buffer[i++];
+          final digit = c ^ tokenZero;
+          if (digit <= 9) {
+            expValue = 10 * expValue + digit;
+          } else {
+            break;
+          }
+        }
+        exponent += expSign * expValue;
+        break;
+      } else {
+        break;
+      }
+    }
+
+    _head = i - 1;
+
+    if (exponent == 0) {
+      if (doubleValue <= maxInt) {
+        return (sign * doubleValue).toInt();
+      } else {
+        return sign * doubleValue;
+      }
+    } else if (exponent < 0) {
+      final negExponent = -exponent;
+      if (negExponent < powersOfTen.length) {
+        return sign * (doubleValue / powersOfTen[negExponent]);
+      } else {
+        return null;
+      }
+    } else if (exponent < powersOfTen.length) {
+      return sign * (doubleValue * powersOfTen[exponent]);
+    } else {
+      return null;
     }
   }
 
@@ -267,17 +301,37 @@ class Crimson {
 
   /// Reads a string value.
   String readString() {
-    var i = _head;
-    if (buffer[i++] != tokenDoubleQuote) {
+    if (buffer[_head] != tokenDoubleQuote) {
       _error(_head - 1, expected: '"');
     }
+    final start = _head + 1;
+    var i = start;
+    while (true) {
+      final c = buffer[i++];
+      if (c == tokenDoubleQuote) {
+        _head = i;
+        return String.fromCharCodes(buffer, start, i - 1);
+      } else if (c == tokenBackslash || c >= 128) {
+        // If we encounter a backslash, which is a beginning of an escape
+        // sequence or a high bit was set - indicating an UTF-8 encoded
+        // multibyte character, there is no chance that we can decode the string
+        // without instantiating a temporary buffer
+        _head = start;
+        return _readStringSlowPath();
+      }
+    }
+  }
 
+  String _readStringSlowPath() {
+    var i = _head;
+    var strBuf = _stringBuffer;
     var si = 0;
     while (true) {
       var bc = buffer[i++];
       if (bc == tokenDoubleQuote) {
         _head = i;
-        return String.fromCharCodes(_stringBuffer, 0, si);
+        _stringBuffer = strBuf;
+        return String.fromCharCodes(strBuf, 0, si);
       }
       if (bc == tokenBackslash) {
         bc = buffer[i++];
@@ -328,24 +382,21 @@ class Crimson {
             if (bc >= 0x10000) {
               // split surrogates
               final sup = bc - 0x10000;
-              if (si >= _stringBuffer.length - 1) {
-                final old = _stringBuffer;
-                _stringBuffer = Uint16List(_stringBuffer.length * 2);
-                _stringBuffer.setAll(0, old);
+              if (si >= strBuf.length - 1) {
+                strBuf = Uint16List(strBuf.length * 2)
+                  ..setAll(0, _stringBuffer);
               }
-              _stringBuffer[si++] = (sup >>> 10) + 0xd800;
-              _stringBuffer[si++] = (sup & 0x3ff) + 0xdc00;
+              strBuf[si++] = (sup >>> 10) + 0xd800;
+              strBuf[si++] = (sup & 0x3ff) + 0xdc00;
               continue;
             }
           }
         }
       }
-      if (si == _stringBuffer.length) {
-        final old = _stringBuffer;
-        _stringBuffer = Uint16List(_stringBuffer.length * 2);
-        _stringBuffer.setAll(0, old);
+      if (si == strBuf.length) {
+        strBuf = Uint16List(strBuf.length * 2)..setAll(0, _stringBuffer);
       }
-      _stringBuffer[si++] = bc;
+      strBuf[si++] = bc;
     }
   }
 

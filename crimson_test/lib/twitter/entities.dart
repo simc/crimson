@@ -6,8 +6,8 @@ import 'util.dart';
 
 part 'entities.g.dart';
 
-@JsonSerializable()
-@json
+@JsonSerializable(createToJson: false)
+@Json()
 class Entities {
   Entities();
 
@@ -27,8 +27,8 @@ class Entities {
   List<Poll>? polls;
 }
 
-@JsonSerializable()
-@json
+@JsonSerializable(createToJson: false)
+@Json()
 class Hashtag {
   Hashtag();
 
@@ -40,8 +40,8 @@ class Hashtag {
   String? text;
 }
 
-@JsonSerializable()
-@json
+@JsonSerializable(createToJson: false)
+@Json()
 class Poll {
   Poll();
 
@@ -56,8 +56,8 @@ class Poll {
   String? duration_minutes;
 }
 
-@JsonSerializable()
-@json
+@JsonSerializable(createToJson: false)
+@Json()
 class Option {
   Option();
 
@@ -68,8 +68,8 @@ class Option {
   String? text;
 }
 
-@JsonSerializable()
-@json
+@JsonSerializable(createToJson: false)
+@Json()
 class Symbol {
   Symbol();
 
@@ -80,8 +80,8 @@ class Symbol {
   String? text;
 }
 
-@JsonSerializable()
-@json
+@JsonSerializable(createToJson: false)
+@Json()
 class Url {
   Url();
 
@@ -96,8 +96,8 @@ class Url {
   String? url;
 }
 
-@JsonSerializable()
-@json
+@JsonSerializable(createToJson: false)
+@Json()
 class UserMention {
   UserMention();
 

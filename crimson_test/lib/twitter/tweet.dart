@@ -8,8 +8,8 @@ import 'util.dart';
 
 part 'tweet.g.dart';
 
-@JsonSerializable()
-@json
+@JsonSerializable(createToJson: false)
+@Json()
 class Tweet {
   Tweet();
 
@@ -78,8 +78,8 @@ class Tweet {
   List<int>? display_text_range;
 }
 
-@JsonSerializable()
-@json
+@JsonSerializable(createToJson: false)
+@Json()
 class CurrentUserRetweet {
   CurrentUserRetweet();
 
@@ -89,8 +89,8 @@ class CurrentUserRetweet {
   String? id_str;
 }
 
-@JsonSerializable()
-@json
+@JsonSerializable(createToJson: false)
+@Json()
 class QuotedStatusPermalink {
   QuotedStatusPermalink();
 

@@ -3,8 +3,8 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'media.g.dart';
 
-@JsonSerializable()
-@json
+@JsonSerializable(createToJson: false)
+@Json()
 class Media {
   Media();
 
@@ -35,8 +35,8 @@ class Media {
   AdditionalMediaInfo? additional_mediaInfo;
 }
 
-@JsonSerializable()
-@json
+@JsonSerializable(createToJson: false)
+@Json()
 class Sizes {
   Sizes();
 
@@ -51,8 +51,8 @@ class Sizes {
   Size? large;
 }
 
-@JsonSerializable()
-@json
+@JsonSerializable(createToJson: false)
+@Json()
 class Size {
   Size();
 
@@ -65,8 +65,8 @@ class Size {
   String? resize;
 }
 
-@JsonSerializable()
-@json
+@JsonSerializable(createToJson: false)
+@Json()
 class AdditionalMediaInfo {
   AdditionalMediaInfo();
 
@@ -82,8 +82,8 @@ class AdditionalMediaInfo {
   bool? monetizable;
 }
 
-@JsonSerializable()
-@json
+@JsonSerializable(createToJson: false)
+@Json()
 class VideoInfo {
   VideoInfo();
 
@@ -97,8 +97,8 @@ class VideoInfo {
   List<Variant>? variants;
 }
 
-@JsonSerializable()
-@json
+@JsonSerializable(createToJson: false)
+@Json()
 class Variant {
   Variant();
 

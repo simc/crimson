@@ -6,8 +6,8 @@ import 'util.dart';
 
 part 'user.g.dart';
 
-@JsonSerializable()
-@json
+@JsonSerializable(createToJson: false)
+@Json()
 class User {
   User();
 
@@ -58,8 +58,8 @@ class User {
   String? withheld_scope;
 }
 
-@JsonSerializable()
-@json
+@JsonSerializable(createToJson: false)
+@Json()
 class UserEntities {
   UserEntities();
 
@@ -71,8 +71,8 @@ class UserEntities {
   UserEntityUrl? description;
 }
 
-@JsonSerializable()
-@json
+@JsonSerializable(createToJson: false)
+@Json()
 class UserEntityUrl {
   UserEntityUrl();
 

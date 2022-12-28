@@ -1,3 +1,11 @@
+# 0.0.4
+
+- Replaced `@json` and `@JsonEnum()` with `@Json()`
+- Fixed number parsing for exotic doubles
+- Improved performance
+- Added logo
+- Added example
+
 # 0.0.3
 
 - Fixed analyzer version unsupported by Flutter

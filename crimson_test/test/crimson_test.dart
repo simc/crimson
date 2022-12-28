@@ -33,5 +33,5 @@ void testJson(String json) {
   final crimson = Crimson(utf8.encode(json) as Uint8List);
   final crimsonResult = crimson.read();
   final jsonResult = jsonDecode(json);
-  expect(crimsonResult, jsonResult);
+  expect(crimsonResult, equals(jsonResult, 1000));
 }

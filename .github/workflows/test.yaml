@@ -1,0 +1,42 @@
+name: Dart CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  format:
+    name: Check formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dart-lang/setup-dart@v1.3
+      - name: Check formatting
+        run: dart format . --set-exit-if-changed
+
+  lint:
+    name: Check lints
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dart-lang/setup-dart@v1.3
+      - run: dart pub get
+      - name: Lint
+        run: dart analyze --fatal-infos
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dart-lang/setup-dart@v1.3
+      - name: Run Unit tests
+        run: |
+          dart pub get
+          dart pub run build_runner build
+          dart test
+        working-directory: crimson_test
