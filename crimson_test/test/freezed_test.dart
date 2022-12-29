@@ -10,11 +10,34 @@ part 'freezed_test.freezed.dart';
 @freezed
 class TestObject with _$TestObject {
   // ignore: invalid_annotation_target
-  @Json()
+  @json
   const factory TestObject({
     required String name,
     required int age,
   }) = _TestObject;
+}
+
+@jsonKebabCase
+class MyObject {
+  MyObject(this.testName, this.testAge);
+
+  final String testName;
+  final int testAge;
+}
+
+@jsonSnakeCase
+class MyObject2 {
+  MyObject2(this.testName, this.testAge);
+
+  final String testName;
+  final int testAge;
+}
+
+@jsonSnakeCase
+enum TestEnum {
+  @JsonName('test', aliases: {'alias1', 'alias2'})
+  testValue,
+  testValue2,
 }
 
 void main() {

@@ -7,7 +7,7 @@ import 'util.dart';
 part 'entities.g.dart';
 
 @JsonSerializable(createToJson: false)
-@Json()
+@json
 class Entities {
   Entities();
 
@@ -28,7 +28,7 @@ class Entities {
 }
 
 @JsonSerializable(createToJson: false)
-@Json()
+@json
 class Hashtag {
   Hashtag();
 
@@ -41,7 +41,7 @@ class Hashtag {
 }
 
 @JsonSerializable(createToJson: false)
-@Json()
+@json
 class Poll {
   Poll();
 
@@ -50,14 +50,14 @@ class Poll {
   List<Option>? options;
 
   @JsonKey(fromJson: convertTwitterDateTime)
-  @JsonField(fromJson: convertTwitterDateTime)
+  @TwitterDateConverter()
   DateTime? end_datetime;
 
   String? duration_minutes;
 }
 
 @JsonSerializable(createToJson: false)
-@Json()
+@json
 class Option {
   Option();
 
@@ -69,7 +69,7 @@ class Option {
 }
 
 @JsonSerializable(createToJson: false)
-@Json()
+@json
 class Symbol {
   Symbol();
 
@@ -81,7 +81,7 @@ class Symbol {
 }
 
 @JsonSerializable(createToJson: false)
-@Json()
+@json
 class Url {
   Url();
 
@@ -97,7 +97,7 @@ class Url {
 }
 
 @JsonSerializable(createToJson: false)
-@Json()
+@json
 class UserMention {
   UserMention();
 

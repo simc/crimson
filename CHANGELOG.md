@@ -1,3 +1,9 @@
+# 0.0.5
+
+- Changed annotations again (sorry! this is the last time)
+- Added `@JsonName()`, `@jsonIgnore`, `@jsonKebabCase` and `@jsonSnakeCase` annotations annotations
+- Added `JsonConverter` interface to allow custom parsing and serialization
+
 # 0.0.4
 
 - Replaced `@json` and `@JsonEnum()` with `@Json()`

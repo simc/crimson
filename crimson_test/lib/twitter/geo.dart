@@ -4,7 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'geo.g.dart';
 
 @JsonSerializable(createToJson: false)
-@Json()
+@json
 class Place {
   Place();
 
@@ -25,7 +25,7 @@ class Place {
   String? country;
 }
 
-@Json()
+@json
 enum PlaceType {
   admin,
   country,
@@ -35,7 +35,7 @@ enum PlaceType {
 }
 
 @JsonSerializable(createToJson: false)
-@Json()
+@json
 class Coordinates {
   Coordinates();
 

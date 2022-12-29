@@ -7,7 +7,7 @@ import 'util.dart';
 part 'user.g.dart';
 
 @JsonSerializable(createToJson: false)
-@Json()
+@json
 class User {
   User();
 
@@ -42,7 +42,7 @@ class User {
   int? statuses_count;
 
   @JsonKey(fromJson: convertTwitterDateTime)
-  @JsonField(fromJson: convertTwitterDateTime)
+  @TwitterDateConverter()
   DateTime? createt_at;
 
   String? profile_banner_url;
@@ -59,7 +59,7 @@ class User {
 }
 
 @JsonSerializable(createToJson: false)
-@Json()
+@json
 class UserEntities {
   UserEntities();
 
@@ -72,7 +72,7 @@ class UserEntities {
 }
 
 @JsonSerializable(createToJson: false)
-@Json()
+@json
 class UserEntityUrl {
   UserEntityUrl();
 

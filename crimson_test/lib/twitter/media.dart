@@ -4,7 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'media.g.dart';
 
 @JsonSerializable(createToJson: false)
-@Json()
+@json
 class Media {
   Media();
 
@@ -36,7 +36,7 @@ class Media {
 }
 
 @JsonSerializable(createToJson: false)
-@Json()
+@json
 class Sizes {
   Sizes();
 
@@ -52,7 +52,7 @@ class Sizes {
 }
 
 @JsonSerializable(createToJson: false)
-@Json()
+@json
 class Size {
   Size();
 
@@ -66,7 +66,7 @@ class Size {
 }
 
 @JsonSerializable(createToJson: false)
-@Json()
+@json
 class AdditionalMediaInfo {
   AdditionalMediaInfo();
 
@@ -83,7 +83,7 @@ class AdditionalMediaInfo {
 }
 
 @JsonSerializable(createToJson: false)
-@Json()
+@json
 class VideoInfo {
   VideoInfo();
 
@@ -98,7 +98,7 @@ class VideoInfo {
 }
 
 @JsonSerializable(createToJson: false)
-@Json()
+@json
 class Variant {
   Variant();
 

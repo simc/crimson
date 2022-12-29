@@ -1,9 +1,6 @@
-import 'package:meta/meta_meta.dart';
-
-/// Annotation for classes to generate Crimson converters.
-@Target({TargetKind.classType, TargetKind.enumType})
+/// Annotation for classes and enums to generate Crimson JSON support.
 class Json {
-  /// Annotation for classes to generate Crimson converters.
+  /// Annotation for classes and enums to generate Crimson JSON support.
   const Json({this.enumField});
 
   /// The name of the field to use for enum classes.
@@ -13,22 +10,46 @@ class Json {
   final String? enumField;
 }
 
-/// Annotation for fields to customize the JSON field name or to ignore it.
-@Target({TargetKind.field, TargetKind.getter, TargetKind.setter})
-class JsonField {
-  /// Annotation for fields to customize the JSON field name or to ignore it.
-  const JsonField({
-    this.name,
-    this.fromJson,
-    this.ignore = false,
-  });
+/// Annotation for classes and enums to generate Crimson JSON support.
+const json = Json();
+
+/// @nodoc
+class JsonKebabCase extends Json {
+  /// @nodoc
+  const JsonKebabCase();
+}
+
+/// Annotation for classes to generate Crimson JSON support and change the
+/// field names to kebab-case.
+const jsonKebabCase = JsonKebabCase();
+
+/// @nodoc
+class JsonSnakeCase extends Json {
+  /// @nodoc
+  const JsonSnakeCase();
+}
+
+/// Annotation for classes to generate Crimson JSON support and change the
+/// field names to snake_case.
+const jsonSnakeCase = JsonSnakeCase();
+
+/// Annotation for fields to customize the JSON field name.
+class JsonName {
+  /// Annotation for fields to customize the JSON field name.
+  const JsonName(this.name, {this.aliases});
 
   /// The name of the field in the JSON.
-  final String? name;
+  final String name;
 
-  /// A function to convert the JSON value to the field value.
-  final Function? fromJson;
-
-  /// Whether to ignore this field.
-  final bool ignore;
+  /// Aliases for the field in the JSON.
+  final Set<String>? aliases;
 }
+
+/// @nodoc
+class JsonIgnore {
+  /// @nodoc
+  const JsonIgnore();
+}
+
+/// Annotation to ignore a field.
+const jsonIgnore = JsonIgnore();

@@ -5,9 +5,15 @@ import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
 import 'package:crimson/crimson.dart';
+import 'package:crimson/src/annotations.dart';
 import 'package:source_gen/source_gen.dart';
 
-const TypeChecker _fieldChecker = TypeChecker.fromRuntime(JsonField);
+const TypeChecker _jsonChecker = TypeChecker.fromRuntime(Json);
+const TypeChecker _jsonKebabChecker = TypeChecker.fromRuntime(JsonKebabCase);
+const TypeChecker _jsonSnakeChecker = TypeChecker.fromRuntime(JsonSnakeCase);
+const TypeChecker _nameChecker = TypeChecker.fromRuntime(JsonName);
+const TypeChecker _ignoreChecker = TypeChecker.fromRuntime(JsonIgnore);
+const TypeChecker _converterChecker = TypeChecker.fromRuntime(JsonConverter);
 
 /// @nodoc
 class CrimsonGenerator extends GeneratorForAnnotation<Json> {
@@ -40,9 +46,17 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
 
     // hack to fix freezed names
     final cls = element.displayName.replaceFirst(r'_$_', '');
-    var code = '''
-    extension Read$cls on Crimson {
-      $cls read$cls() {''';
+    var code = 'extension Read$cls on Crimson {';
+
+    final converters = accessors
+        .map((e) => e.jsonConverter?.displayName)
+        .whereType<String>()
+        .toSet();
+    for (final converter in converters) {
+      code += 'static const _$converter = $converter();';
+    }
+
+    code += '$cls read$cls() {';
     for (final accessor in accessors) {
       final nullable = accessor.type.isNullable;
       final hasDefault = params[accessor.name]?.defaultValueCode != null;
@@ -58,15 +72,18 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
         case -1:
           break loop;''';
     for (final accessor in accessors) {
-      final name = accessor.jsonName;
-      final fromJson = accessor.jsonFromJson;
-      final fromJsonParamType = fromJson?.parameters.first.type;
-      final value = _read(fromJsonParamType ?? accessor.type);
+      final names = [accessor.jsonName, ...accessor.jsonAliases];
+      final converter = accessor.jsonConverter?.displayName;
+      final value = converter != null
+          ? '_$converter.fromJson(read())'
+          : _read(accessor.type);
 
+      for (final name in names) {
+        code += 'case ${Crimson.hash(name)}:';
+      }
       code += '''
-      case ${Crimson.hash(name)}:
-        ${accessor.name} = ${fromJson != null ? '${fromJson.name}(' : '('} $value);
-        break;''';
+      ${accessor.name} = $value;
+      break;''';
     }
     code += '''
       default:
@@ -127,11 +144,14 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
   String _generateEnumDecode(EnumElement enumClass, String propertyName) {
     final enumElements =
         enumClass.fields.where((f) => f.isEnumConstant).toList();
-    final valueMap = <String, dynamic>{};
+    final valueMap = <dynamic, String>{};
 
     if (propertyName == 'name') {
       for (final element in enumElements) {
-        valueMap[element.name] = element.name;
+        valueMap[element.jsonName] = element.name;
+        for (final alias in element.jsonAliases) {
+          valueMap[alias] = element.name;
+        }
       }
     } else {
       for (final element in enumElements) {
@@ -148,21 +168,21 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
         if (valueMap.values.contains(propertyValue)) {
           _err('Enum property has duplicate values.', element);
         }
-        valueMap[element.name] = propertyValue;
+        valueMap[propertyValue] = element.name;
       }
     }
 
     final cls = enumClass.displayName;
     final map = valueMap.entries.map((e) {
-      final value = e.value;
-      if (value is String) {
-        return "'${e.value}': $cls.${e.key}";
+      final key = e.key;
+      if (key is String) {
+        return "'$key': $cls.${e.value}";
       } else {
-        return '${e.value}: $cls.${e.key}';
+        return '$key: $cls.${e.value}';
       }
     }).join(',');
     return '''
-    final _${cls}Map = {$map};
+    const _${cls}Map = {$map};
     extension Read$cls on Crimson {
       $cls read$cls() {
         return _${cls}Map[read()]!;
@@ -213,8 +233,12 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
       code += 'readString()';
     } else if (type.isDynamic || type.isDartCoreBool) {
       code += 'read()';
-    } else {
+    } else if (type.element?.name == 'DateTime') {
+      code += 'DateTime.parse(readString())';
+    } else if (type.hasJsonAnnotation) {
       code += 'read${type.element!.name}()';
+    } else {
+      code += '${type.element!.displayName}.fromJson(read())';
     }
 
     return code;
@@ -243,6 +267,10 @@ extension on ClassElement {
 }
 
 extension on DartType {
+  bool get hasJsonAnnotation {
+    return _jsonChecker.hasAnnotationOfExact(element!.nonSynthetic);
+  }
+
   bool get isNullable {
     return nullabilitySuffix == NullabilitySuffix.question;
   }
@@ -266,23 +294,47 @@ extension on DartType {
 
 extension on PropertyInducingElement {
   String get jsonName {
-    final ann = _fieldChecker.firstAnnotationOfExact(nonSynthetic);
-    return ann?.getField('name')?.toStringValue() ?? name;
+    final ann = _nameChecker.firstAnnotationOfExact(nonSynthetic);
+    final annName = ann?.getField('name')?.toStringValue();
+    if (annName != null) {
+      return annName;
+    }
+
+    final separator = _jsonKebabChecker.hasAnnotationOf(enclosingElement!)
+        ? '-'
+        : _jsonSnakeChecker.hasAnnotationOf(enclosingElement!)
+            ? '_'
+            : null;
+    if (separator != null) {
+      return name.splitMapJoin(
+        RegExp('([A-Z])'),
+        onMatch: (m) => '_${m.group(1)!.toLowerCase()}',
+        onNonMatch: (s) => s,
+      );
+    } else {
+      return name;
+    }
+  }
+
+  Set<String> get jsonAliases {
+    final ann = _nameChecker.firstAnnotationOfExact(nonSynthetic);
+    return ann
+            ?.getField('aliases')
+            ?.toSetValue()
+            ?.map((e) => e.toStringValue()!)
+            .toSet() ??
+        {};
   }
 
   bool get jsonIgnore {
-    final ann = _fieldChecker.firstAnnotationOfExact(nonSynthetic);
-    final ignore = ann?.getField('ignore')?.toBoolValue() ?? false;
-    if (ignore) {
-      return true;
-    }
-
-    return {'hashCode', 'runtimeType', 'copyWith'}.contains(name);
+    final ann = _ignoreChecker.firstAnnotationOfExact(nonSynthetic);
+    return ann != null ||
+        {'hashCode', 'runtimeType', 'copyWith'}.contains(name);
   }
 
-  ExecutableElement? get jsonFromJson {
-    final ann = _fieldChecker.firstAnnotationOfExact(nonSynthetic);
-    return ann?.getField('fromJson')?.toFunctionValue();
+  Element? get jsonConverter {
+    final ann = _converterChecker.firstAnnotationOf(nonSynthetic);
+    return ann?.type?.element;
   }
 }
 

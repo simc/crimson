@@ -9,14 +9,14 @@ import 'util.dart';
 part 'tweet.g.dart';
 
 @JsonSerializable(createToJson: false)
-@Json()
+@json
 class Tweet {
   Tweet();
 
   factory Tweet.fromJson(Map<String, dynamic> json) => _$TweetFromJson(json);
 
   @JsonKey(fromJson: convertTwitterDateTime)
-  @JsonField(fromJson: convertTwitterDateTime)
+  @TwitterDateConverter()
   DateTime? created_at;
 
   String? id_str;
@@ -79,7 +79,7 @@ class Tweet {
 }
 
 @JsonSerializable(createToJson: false)
-@Json()
+@json
 class CurrentUserRetweet {
   CurrentUserRetweet();
 
@@ -90,7 +90,7 @@ class CurrentUserRetweet {
 }
 
 @JsonSerializable(createToJson: false)
-@Json()
+@json
 class QuotedStatusPermalink {
   QuotedStatusPermalink();
 

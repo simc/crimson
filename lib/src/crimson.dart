@@ -434,6 +434,23 @@ class Crimson {
     }
   }
 
+  /// Reads a DateTime value. Supports both ISO 8601 and UNIX second and
+  /// millisecond timestamps.
+  DateTime readDateTime() {
+    final value = read();
+    if (value is String) {
+      return DateTime.parse(value);
+    } else if (value is num) {
+      if (value > 20000000000) {
+        return DateTime.fromMillisecondsSinceEpoch(value.toInt());
+      } else {
+        return DateTime.fromMillisecondsSinceEpoch(value.toInt() * 1000);
+      }
+    } else {
+      _error(_head - 1, expected: 'DateTime');
+    }
+  }
+
   /// Allows iterating a list value without allocating a [List].
   ///
   /// Returns `true` if there is another element in the list.

@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'dart:convert' as convert;
 import 'dart:io';
 
 import 'package:crimson/crimson.dart';
@@ -14,7 +14,7 @@ void main() {
     s.stop();
 
     final s2 = Stopwatch()..start();
-    final list = json.fuse(utf8).decode(bytes) as List;
+    final list = convert.json.fuse(convert.utf8).decode(bytes) as List;
     list.map((e) => Tweet.fromJson(e as Map<String, dynamic>)).toList();
     s2.stop();
 

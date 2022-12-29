@@ -33,25 +33,20 @@
 
 ## Usage
 
-After adding Crimson to your `pubspec.yaml`, you can start annotating your classes with `@Json()` and optionally `@JsonField()`:
+After adding Crimson to your `pubspec.yaml`, you can start annotating your classes with `@json` and optionally `@JsonField()`:
 
 ```dart
 import 'package:crimson/crimson.dart';
 
 part 'tweet.g.dart';
 
-@Json()
+@json
 class Tweet {
-  DateTime? created_at;
+  DateTime? createdAt;
 
-  @JsonField(name: 'text')
   String? tweet;
 
-  int? reply_count;
-
-  int? retweet_count;
-
-  int? favorite_count;
+  int? favoriteCount;
 }
 ```
 
@@ -70,6 +65,97 @@ void main() {
 
 That's it! You can now parse and serialize JSON with ease.
 
+### Ignoring fields
+
+Annotate properties with `@jsonIgnore` to ignore them:
+
+```dart
+@json
+class Tweet {
+  DateTime? created_at;
+
+  String? tweet;
+
+  @jsonIgnore
+  int? favoriteCount;
+}
+```
+
+### Renaming fields
+
+Use the `@JsonName()` annotation to rename individual fields:
+
+```dart
+@json
+class Tweet {
+  @JsonName('created_at')
+  DateTime? createdAt;
+
+  @JsonName('text', aliases: {'alias1', 'alias2'})
+  String? tweet;
+}
+```
+
+The same works for enum values:
+
+```dart
+@json
+enum TweetType {
+  tweet,
+
+  @JsonName('re-tweet')
+  retweet,
+}
+```
+
+If you want to rename all fields or enum values, you can use `@jsonKebabCase` and `@jsonSnakeCase`:
+
+```dart
+@jsonKebabCase
+class Tweet {
+  DateTime? createdAt; // created-at
+
+  String? tweet; // tweet
+
+  int? favoriteCount; // favorite-count
+}
+
+@jsonSnakeCase
+enum PlaceType {
+  country, // country
+  largeCity, // large_city
+  smallCity, // small_city
+}
+```
+
+### Custom converters
+
+You can use custom converters to convert between JSON and Dart types. Just create a class that implements `JsonConverter<T>`.
+
+```dart
+class IntToBoolConverter extends JsonConverter<bool> {
+  const IntToBoolConverter();
+
+  @override
+  bool fromJson(dynamic json) => json == 1;
+
+  @override
+  dynamic toJson(bool value) => value ? 1 : 0;
+}
+```
+
+Then you can annotate your properties with the new converter:
+
+```dart
+@json
+class Tweet {
+  String? tweet;
+
+  @IntToBoolConverter()
+  bool? isFavorite;
+}
+```
+
 ## Freezed Support
 
 Crimson supports classes annotated with `@freezed` from the [freezed](https://pub.dev/packages/freezed) package.
@@ -82,7 +168,7 @@ part 'tweet.freezed.dart';
 
 @freezed
 class Tweet with _$Tweet {
-  @Json()
+  @json
   const factory Tweet({
     DateTime? created_at,
     @JsonField(name: 'text') String? tweet,
