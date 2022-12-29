@@ -13,7 +13,7 @@ const TypeChecker _jsonKebabChecker = TypeChecker.fromRuntime(JsonKebabCase);
 const TypeChecker _jsonSnakeChecker = TypeChecker.fromRuntime(JsonSnakeCase);
 const TypeChecker _nameChecker = TypeChecker.fromRuntime(JsonName);
 const TypeChecker _ignoreChecker = TypeChecker.fromRuntime(JsonIgnore);
-const TypeChecker _converterChecker = TypeChecker.fromRuntime(JsonConverter);
+const TypeChecker _convertChecker = TypeChecker.fromRuntime(JsonConvert);
 
 /// @nodoc
 class CrimsonGenerator extends GeneratorForAnnotation<Json> {
@@ -48,14 +48,6 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
     final cls = element.displayName.replaceFirst(r'_$_', '');
     var code = 'extension Read$cls on Crimson {';
 
-    final converters = accessors
-        .map((e) => e.jsonConverter?.displayName)
-        .whereType<String>()
-        .toSet();
-    for (final converter in converters) {
-      code += 'static const _$converter = $converter();';
-    }
-
     code += '$cls read$cls() {';
     for (final accessor in accessors) {
       final nullable = accessor.type.isNullable;
@@ -73,13 +65,15 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
           break loop;''';
     for (final accessor in accessors) {
       final names = [accessor.jsonName, ...accessor.jsonAliases];
-      final converter = accessor.jsonConverter?.displayName;
-      final value = converter != null
-          ? '_$converter.fromJson(read())'
-          : _read(accessor.type);
+      final fromJson = accessor.fromJson;
+      final type = fromJson?.parameters.first.type ?? accessor.type;
+      var value = _read(type);
+      if (fromJson != null) {
+        value = '${fromJson.name}($value)';
+      }
 
       for (final name in names) {
-        code += 'case ${Crimson.hash(name)}:';
+        code += 'case ${Crimson.hash(name)}: // $name\n';
       }
       code += '''
       ${accessor.name} = $value;
@@ -268,7 +262,7 @@ extension on ClassElement {
 
 extension on DartType {
   bool get hasJsonAnnotation {
-    return _jsonChecker.hasAnnotationOfExact(element!.nonSynthetic);
+    return _jsonChecker.hasAnnotationOf(element!.nonSynthetic);
   }
 
   bool get isNullable {
@@ -308,7 +302,7 @@ extension on PropertyInducingElement {
     if (separator != null) {
       return name.splitMapJoin(
         RegExp('([A-Z])'),
-        onMatch: (m) => '_${m.group(1)!.toLowerCase()}',
+        onMatch: (m) => '$separator${m.group(1)!.toLowerCase()}',
         onNonMatch: (s) => s,
       );
     } else {
@@ -332,9 +326,9 @@ extension on PropertyInducingElement {
         {'hashCode', 'runtimeType', 'copyWith'}.contains(name);
   }
 
-  Element? get jsonConverter {
-    final ann = _converterChecker.firstAnnotationOf(nonSynthetic);
-    return ann?.type?.element;
+  ExecutableElement? get fromJson {
+    final ann = _convertChecker.firstAnnotationOf(nonSynthetic);
+    return ann?.getField('fromJson')?.toFunctionValue();
   }
 }
 

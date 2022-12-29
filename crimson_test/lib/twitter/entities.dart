@@ -50,7 +50,7 @@ class Poll {
   List<Option>? options;
 
   @JsonKey(fromJson: convertTwitterDateTime)
-  @TwitterDateConverter()
+  @JsonConvert(fromJson: convertTwitterDateTime)
   DateTime? end_datetime;
 
   String? duration_minutes;

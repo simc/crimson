@@ -53,3 +53,15 @@ class JsonIgnore {
 
 /// Annotation to ignore a field.
 const jsonIgnore = JsonIgnore();
+
+/// Specifies how to convert a JSON value to a Dart object and vice versa.
+class JsonConvert<D, J> {
+  /// Specifies how to convert a JSON value to a Dart object and vice versa.
+  const JsonConvert({this.fromJson, this.toJson});
+
+  /// Converts a JSON value to a Dart object.
+  final D Function(J)? fromJson;
+
+  /// Converts a Dart object to a JSON value.
+  final J Function(D)? toJson;
+}

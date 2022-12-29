@@ -130,30 +130,20 @@ enum PlaceType {
 
 ## Custom converters
 
-You can use custom converters to convert between JSON and Dart types. Just create a class that implements `JsonConverter<T>`.
-
-```dart
-class IntToBoolConverter extends JsonConverter<bool> {
-  const IntToBoolConverter();
-
-  @override
-  bool fromJson(dynamic json) => json == 1;
-
-  @override
-  dynamic toJson(bool value) => value ? 1 : 0;
-}
-```
-
-Then you can annotate your properties with the new converter:
+You can use custom converters to convert between JSON and Dart types using the `@JsonConvert()` annotation:
 
 ```dart
 @json
 class Tweet {
   String? tweet;
 
-  @IntToBoolConverter()
+  @JsonConvert(fromJson: jsonIntToBool, toJson: boolToJsonInt)
   bool? isFavorite;
 }
+
+bool jsonIntToBool(int json) => json >= 1;
+
+int boolToJsonInt(bool value) => value ? 1 : 0;
 ```
 
 ## Freezed Support

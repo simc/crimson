@@ -68,10 +68,10 @@ class Crimson {
         _head += 3;
         break;
       case tokenLBracket:
-        _skipList();
+        skipPartialList();
         break;
       case tokenLBrace:
-        _skipObject();
+        skipPartialObject();
         break;
       default:
         _skipNumber();
@@ -125,7 +125,8 @@ class Crimson {
     _head = i - 1;
   }
 
-  void _skipList() {
+  /// Skips the remaining values in the current list.
+  void skipPartialList() {
     var level = 1;
     for (var i = _head; i < _tail; i++) {
       switch (buffer[i]) {
@@ -150,7 +151,8 @@ class Crimson {
     _error(_head - 1, expected: ']');
   }
 
-  void _skipObject() {
+  /// Skips the remaining values in the current object.
+  void skipPartialObject() {
     var level = 1;
     for (var i = _head; i < _tail; i++) {
       switch (buffer[i]) {
@@ -383,7 +385,7 @@ class Crimson {
               // split surrogates
               final sup = bc - 0x10000;
               if (si >= strBuf.length - 1) {
-                strBuf = Uint16List(strBuf.length * 2)
+                strBuf = Uint16List((strBuf.length * 1.5).toInt())
                   ..setAll(0, _stringBuffer);
               }
               strBuf[si++] = (sup >>> 10) + 0xd800;
@@ -394,7 +396,8 @@ class Crimson {
         }
       }
       if (si == strBuf.length) {
-        strBuf = Uint16List(strBuf.length * 2)..setAll(0, _stringBuffer);
+        strBuf = Uint16List((strBuf.length * 1.5).toInt())
+          ..setAll(0, _stringBuffer);
       }
       strBuf[si++] = bc;
     }

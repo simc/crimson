@@ -42,7 +42,7 @@ class User {
   int? statuses_count;
 
   @JsonKey(fromJson: convertTwitterDateTime)
-  @TwitterDateConverter()
+  @JsonConvert(fromJson: convertTwitterDateTime)
   DateTime? createt_at;
 
   String? profile_banner_url;

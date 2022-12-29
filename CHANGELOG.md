@@ -1,3 +1,9 @@
+# 0.1.0
+
+- Made `skipPartialObject()` and `skipPartialList()` public
+- Replaced `JsonConverter` interface with a `@JsonConvert()` annotation
+- Added more unit tests
+
 # 0.0.5
 
 - Changed annotations again (sorry! this is the last time)

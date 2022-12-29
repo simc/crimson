@@ -25,17 +25,3 @@ String formatTwitterDateString(String twitterDateString) {
 
   return sanitized.join(' ');
 }
-
-class TwitterDateConverter extends JsonConverter<DateTime> {
-  const TwitterDateConverter();
-
-  @override
-  DateTime fromJson(dynamic json) {
-    return convertTwitterDateTime(json as String?)!;
-  }
-
-  @override
-  String toJson(DateTime object) {
-    return object.toIso8601String();
-  }
-}

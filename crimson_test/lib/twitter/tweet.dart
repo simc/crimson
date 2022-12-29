@@ -16,7 +16,7 @@ class Tweet {
   factory Tweet.fromJson(Map<String, dynamic> json) => _$TweetFromJson(json);
 
   @JsonKey(fromJson: convertTwitterDateTime)
-  @TwitterDateConverter()
+  @JsonConvert(fromJson: convertTwitterDateTime)
   DateTime? created_at;
 
   String? id_str;
