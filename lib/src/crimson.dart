@@ -6,66 +6,65 @@ import 'package:crimson/src/consts.dart';
 
 /// Crimson is a JSON parser that is optimized for speed.
 class Crimson {
-  /// Creates a new Crimson instance from a [buffer] that reads between [head]
-  /// and [tail].
-  Crimson(this.buffer, [int head = 0, int? tail])
-      : _head = head,
-        _tail = tail ?? buffer.length;
+  /// Creates a new Crimson instance from a [buffer] that reads from [offset].
+  Crimson(this.buffer, [int offset = 0]) : _offset = offset;
 
   /// The buffer to read from.
   final List<int> buffer;
   late Uint16List _stringBuffer = Uint16List(256);
 
-  int _head;
-  final int _tail;
+  int _offset;
+
+  /// The current offset.
+  int get offset => _offset;
 
   Never _error(int offset, {String? expected}) {
     throw FormatException(
       'Unexpected token: '
       '${expected != null ? 'expected $expected actual: ' : ''}'
-      '${String.fromCharCode(buffer[offset])}',
+      '${String.fromCharCodes(buffer, offset, offset + 20)}',
       buffer,
       offset,
     );
   }
 
-  int _nextToken() {
-    var i = _head;
-
-    final token = buffer[i];
+  void _skipWhitespace() {
+    final token = buffer[_offset];
     if (token != tokenSpace &&
-        token != tokenTab &&
         token != tokenLineFeed &&
+        token != tokenTab &&
         token != tokenCarriageReturn) {
-      _head += 1;
-      return token;
+      return;
     }
+
+    var i = _offset;
     while (true) {
-      final token = buffer[i++];
+      final token = buffer[++i];
       if (token != tokenSpace &&
-          token != tokenTab &&
           token != tokenLineFeed &&
+          token != tokenTab &&
           token != tokenCarriageReturn) {
-        _head = i;
-        return token;
+        _offset = i;
+        return;
       }
     }
   }
 
   /// Skips the next value.
   void skip() {
-    switch (_nextToken()) {
+    _skipWhitespace();
+    switch (buffer[_offset++]) {
       case tokenDoubleQuote:
         _skipString();
         break;
       case tokenT:
-        _head += 3;
+        _offset += 3;
         break;
       case tokenF:
-        _head += 4;
+        _offset += 4;
         break;
       case tokenN:
-        _head += 3;
+        _offset += 3;
         break;
       case tokenLBracket:
         skipPartialList();
@@ -81,22 +80,22 @@ class Crimson {
 
   void _skipString() {
     var escaped = false;
-    for (var i = _head;; i++) {
+    for (var i = _offset;; i++) {
       final c = buffer[i];
       if (c == tokenDoubleQuote) {
         if (!escaped) {
-          _head = i + 1;
+          _offset = i + 1;
           return;
         } else {
           var j = i - 1;
           while (true) {
-            if (j < _head || buffer[j] != tokenBackslash) {
+            if (j < _offset || buffer[j] != tokenBackslash) {
               // even number of backslashes either end of buffer, or " found
-              _head = i + 1;
+              _offset = i + 1;
               return;
             }
             j--;
-            if (j < _head || buffer[j] != tokenBackslash) {
+            if (j < _offset || buffer[j] != tokenBackslash) {
               // odd number of backslashes it is \" or \\\"
               break;
             }
@@ -110,7 +109,7 @@ class Crimson {
   }
 
   void _skipNumber() {
-    var i = _head;
+    var i = _offset;
     while (true) {
       final c = buffer[i++];
       if (c ^ tokenZero > 9 &&
@@ -122,18 +121,19 @@ class Crimson {
         break;
       }
     }
-    _head = i - 1;
+    _offset = i - 1;
   }
 
   /// Skips the remaining values in the current list.
   void skipPartialList() {
     var level = 1;
-    for (var i = _head; i < _tail; i++) {
-      switch (buffer[i]) {
+    var i = _offset;
+    while (true) {
+      switch (buffer[i++]) {
         case tokenDoubleQuote: // If inside string, skip it
-          _head = i + 1;
+          _offset = i;
           _skipString();
-          i = _head - 1;
+          i = _offset;
           break;
         case tokenLBracket: // If open symbol, increase level
           level++;
@@ -142,24 +142,24 @@ class Crimson {
           level--;
           // If we have returned to the original level, we're done
           if (level == 0) {
-            _head = i + 1;
+            _offset = i;
             return;
           }
           break;
       }
     }
-    _error(_head - 1, expected: ']');
   }
 
   /// Skips the remaining values in the current object.
   void skipPartialObject() {
     var level = 1;
-    for (var i = _head; i < _tail; i++) {
-      switch (buffer[i]) {
+    var i = _offset;
+    while (true) {
+      switch (buffer[i++]) {
         case tokenDoubleQuote: // If inside string, skip it
-          _head = i + 1;
+          _offset = i;
           _skipString();
-          i = _head - 1;
+          i = _offset;
           break;
         case tokenLBrace: // If open symbol, increase level
           level++;
@@ -169,18 +169,47 @@ class Crimson {
 
           // If we have returned to the original level, we're done
           if (level == 0) {
-            _head = i + 1;
+            _offset = i;
             return;
           }
           break;
       }
     }
-    _error(_head - 1, expected: '}');
+  }
+
+  /// Skips a null value if the next token is null.
+  @pragma('vm:prefer-inline')
+  bool skipNull() {
+    _skipWhitespace();
+    if (buffer[_offset] == tokenN) {
+      _offset += 4;
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /// Reads an [int] value.
+  @pragma('vm:prefer-inline')
   int readInt() {
-    var i = _head;
+    _skipWhitespace();
+    return _readInt();
+  }
+
+  /// Reads an [int] value or null.
+  @pragma('vm:prefer-inline')
+  int? readIntOrNull() {
+    _skipWhitespace();
+    if (buffer[_offset] == tokenN) {
+      _offset += 4;
+      return null;
+    } else {
+      return _readInt();
+    }
+  }
+
+  int _readInt() {
+    var i = _offset;
     var sign = 1;
     if (buffer[i] == tokenMinus) {
       sign = -1;
@@ -197,7 +226,7 @@ class Crimson {
       }
     }
 
-    _head = i - 1;
+    _offset = i - 1;
     return sign * value;
   }
 
@@ -207,21 +236,37 @@ class Crimson {
     return readNum().toDouble();
   }
 
+  /// Reads a [double] value or null.
+  @pragma('vm:prefer-inline')
+  double? readDoubleOrNull() {
+    return readNumOrNull()?.toDouble();
+  }
+
   /// Reads a numerical value. If the value has a fractional part or is too big,
   /// it is returned as a [double]. Otherwise, it is returned as an [int].
+  @pragma('vm:prefer-inline')
   num readNum() {
-    final start = _head;
-    final number = _tryReadNum();
-    if (number == null) {
-      final string = String.fromCharCodes(buffer, start, _head);
-      return num.parse(string);
+    _skipWhitespace();
+    return _readNum();
+  }
+
+  /// Reads a numerical value or null. If the value has a fractional part or is
+  /// too big, it is returned as a [double]. Otherwise, it is returned as an
+  /// [int].
+  @pragma('vm:prefer-inline')
+  num? readNumOrNull() {
+    _skipWhitespace();
+    if (buffer[_offset] == tokenN) {
+      _offset += 4;
+      return null;
     } else {
-      return number;
+      return _readNum();
     }
   }
 
-  num? _tryReadNum() {
-    var i = _head;
+  num _readNum() {
+    final start = _offset;
+    var i = start;
     var exponent = 0;
     // Added to exponent for each digit. Set to -1 when seeing '.'.
     var exponentDelta = 0;
@@ -266,7 +311,7 @@ class Crimson {
       }
     }
 
-    _head = i - 1;
+    _offset = i - 1;
 
     if (exponent == 0) {
       if (doubleValue <= maxInt) {
@@ -278,60 +323,63 @@ class Crimson {
       final negExponent = -exponent;
       if (negExponent < powersOfTen.length) {
         return sign * (doubleValue / powersOfTen[negExponent]);
-      } else {
-        return null;
       }
     } else if (exponent < powersOfTen.length) {
       return sign * (doubleValue * powersOfTen[exponent]);
-    } else {
-      return null;
     }
-  }
 
-  /// Returns whether the next value is null.
-  @pragma('vm:prefer-inline')
-  bool isNull() {
-    return buffer[_head] == tokenN;
-  }
-
-  /// Reads a null value. You need to call this method to skip a null value.
-  @pragma('vm:prefer-inline')
-  // ignore: prefer_void_to_null
-  Null readNull() {
-    _head += 4;
+    final string = String.fromCharCodes(buffer, start, _offset);
+    return num.parse(string);
   }
 
   /// Reads a string value.
+  @pragma('vm:prefer-inline')
   String readString() {
-    if (buffer[_head] != tokenDoubleQuote) {
-      _error(_head - 1, expected: '"');
+    _skipWhitespace();
+    return _readString();
+  }
+
+  /// Reads a string value or null.
+  @pragma('vm:prefer-inline')
+  String? readStringOrNull() {
+    _skipWhitespace();
+    if (buffer[_offset] == tokenN) {
+      _offset += 4;
+      return null;
     }
-    final start = _head + 1;
+    return _readString();
+  }
+
+  String _readString() {
+    if (buffer[_offset] != tokenDoubleQuote) {
+      _error(_offset, expected: '"');
+    }
+    final start = _offset + 1;
     var i = start;
     while (true) {
       final c = buffer[i++];
       if (c == tokenDoubleQuote) {
-        _head = i;
+        _offset = i;
         return String.fromCharCodes(buffer, start, i - 1);
       } else if (c == tokenBackslash || c >= 128) {
         // If we encounter a backslash, which is a beginning of an escape
         // sequence or a high bit was set - indicating an UTF-8 encoded
         // multibyte character, there is no chance that we can decode the string
         // without instantiating a temporary buffer
-        _head = start;
+        _offset = start;
         return _readStringSlowPath();
       }
     }
   }
 
   String _readStringSlowPath() {
-    var i = _head;
+    var i = _offset;
     var strBuf = _stringBuffer;
     var si = 0;
     while (true) {
       var bc = buffer[i++];
       if (bc == tokenDoubleQuote) {
-        _head = i;
+        _offset = i;
         _stringBuffer = strBuf;
         return String.fromCharCodes(strBuf, 0, si);
       }
@@ -417,17 +465,23 @@ class Crimson {
   ///
   /// The hash function is based on the FNV-1a algorithm. [hash] yields the same
   /// value as [readStringHash] for the same string.
+  @pragma('vm:prefer-inline')
   int readStringHash() {
-    var i = _head;
-    if (buffer[i++] != tokenDoubleQuote) {
-      _error(_head - 1, expected: '"');
+    _skipWhitespace();
+    return _readStringHash();
+  }
+
+  int _readStringHash() {
+    if (buffer[_offset] != tokenDoubleQuote) {
+      _error(_offset, expected: '"');
     }
 
+    var i = _offset + 1;
     var hash = 0xcbf29ce484222325;
     while (true) {
       final c = buffer[i++];
       if (c == tokenDoubleQuote) {
-        _head = i;
+        _offset = i;
         return hash;
       }
       hash ^= c >> 8;
@@ -450,7 +504,7 @@ class Crimson {
         return DateTime.fromMillisecondsSinceEpoch(value.toInt() * 1000);
       }
     } else {
-      _error(_head - 1, expected: 'DateTime');
+      _error(_offset, expected: 'DateTime');
     }
   }
 
@@ -458,43 +512,44 @@ class Crimson {
   ///
   /// Returns `true` if there is another element in the list.
   bool iterList() {
-    var c = _nextToken();
-    switch (c) {
+    _skipWhitespace();
+    switch (buffer[_offset++]) {
       case tokenLBracket:
       case tokenComma:
-        c = _nextToken();
-        if (c == tokenRBracket) {
+        _skipWhitespace();
+        if (buffer[_offset] == tokenRBracket) {
+          _offset++;
           return false;
         }
-        _head--;
         return true;
       case tokenRBracket:
         return false;
       default:
-        _error(_head - 1, expected: '[ or , or ]');
+        _error(_offset - 1, expected: '[ or , or ]');
     }
   }
 
   T _iterObject<T>(T Function() readField, T endValue) {
-    var c = _nextToken();
-    switch (c) {
+    _skipWhitespace();
+    switch (buffer[_offset++]) {
       case tokenLBrace:
       case tokenComma:
-        c = _nextToken();
-        if (c == tokenRBrace) {
+        _skipWhitespace();
+        if (buffer[_offset] == tokenRBrace) {
+          _offset++;
           return endValue;
         }
-        _head--;
+
         final field = readField();
-        final colon = _nextToken();
-        if (colon != tokenColon) {
-          _error(_head - 1, expected: ':');
+        _skipWhitespace();
+        if (buffer[_offset++] != tokenColon) {
+          _error(_offset - 1, expected: ':');
         }
         return field;
       case tokenRBrace:
         return endValue;
       default:
-        _error(_head - 1, expected: '{ or , or }');
+        _error(_offset - 1, expected: '{ or , or }');
     }
   }
 
@@ -502,14 +557,14 @@ class Crimson {
   ///
   /// Returns the next field name, or `null` if there are no more fields.
   @pragma('vm:prefer-inline')
-  String? iterObject() => _iterObject(readString, null);
+  String? iterObject() => _iterObject(_readString, null);
 
   /// Allows iterating a map value without allocating a [Map].
   ///
   /// Returns a hash of the next field name, or `-1` if there are no more
   /// fields.
   @pragma('vm:prefer-inline')
-  int iterObjectHash() => _iterObject(readStringHash, -1);
+  int iterObjectHash() => _iterObject(_readStringHash, -1);
 
   /// Convenience method to read a list.
   List<dynamic> readList() {
@@ -529,34 +584,29 @@ class Crimson {
     return map;
   }
 
-  dynamic _read() {
-    switch (buffer[_head]) {
+  /// Reads the next value.
+  @pragma('vm:prefer-inline')
+  dynamic read() {
+    _skipWhitespace();
+    switch (buffer[_offset]) {
       case tokenDoubleQuote:
-        return readString();
+        return _readString();
       case tokenT:
-        _head += 4;
+        _offset += 4;
         return true;
       case tokenF:
-        _head += 5;
+        _offset += 5;
         return false;
       case tokenN:
-        _head += 4;
+        _offset += 4;
         return null;
       case tokenLBracket:
         return readList();
       case tokenLBrace:
         return readMap();
       default:
-        return readNum();
+        return _readNum();
     }
-  }
-
-  /// Reads the next value.
-  @pragma('vm:prefer-inline')
-  dynamic read() {
-    _nextToken();
-    _head--;
-    return _read();
   }
 
   /// Hashes the given String with the same algorithm as [readStringHash] and

@@ -128,7 +128,7 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
       List<$cls?> read${cls}OrNullList() {
         final list = <$cls?>[];
         while(iterList()) {
-          list.add(this.isNull() ? readNull() : read$cls());
+          list.add(skipNull() ? null : read$cls());
         }
         return list;
       }
@@ -193,7 +193,7 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
       List<$cls?> read${cls}OrNullList() {
         final list = <$cls?>[];
         while(iterList()) {
-          list.add(this.isNull() ? readNull() : read$cls());
+          list.add(skipNull() ? null : read$cls());
         }
         return list;
       }
@@ -202,35 +202,36 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
 
   String _read(DartType type) {
     var code = '';
-    if (!type.isDynamic && !type.isDartCoreBool && type.isNullable) {
-      code += 'this.isNull() ? readNull() : ';
-    }
+    final orNull = type.isNullable ? 'OrNull' : '';
+    final skipNull = type.isNullable ? 'skipNull() ? null : ' : '';
     if (type.isDartCoreList) {
       code += '''
+      $skipNull
       [
         for(;iterList();)
           ${_read(type.listParam)},
       ]''';
     } else if (type.isDartCoreMap) {
       code += '''
+      $skipNull
       {
         for(var field = iterObject(); field != null; field = iterObject())
           field: ${_read(type.mapParam)},
       }''';
     } else if (type.isDartCoreDouble) {
-      code += 'readDouble()';
+      code += 'readDouble$orNull()';
     } else if (type.isDartCoreInt) {
-      code += 'readInt()';
+      code += 'readInt$orNull()';
     } else if (type.isDartCoreNum) {
-      code += 'readNum()';
+      code += 'readNum$orNull()';
     } else if (type.isDartCoreString) {
-      code += 'readString()';
+      code += 'readString$orNull()';
     } else if (type.isDynamic || type.isDartCoreBool) {
       code += 'read()';
     } else if (type.element?.name == 'DateTime') {
-      code += 'DateTime.parse(readString())';
+      code += '$skipNull DateTime.parse(readString())';
     } else if (type.hasJsonAnnotation) {
-      code += 'read${type.element!.name}()';
+      code += '$skipNull read${type.element!.name}()';
     } else {
       code += '${type.element!.displayName}.fromJson(read())';
     }

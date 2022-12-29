@@ -1,3 +1,7 @@
+# 0.1.1
+
+- Fixed edge cases
+
 # 0.1.0
 
 - Made `skipPartialObject()` and `skipPartialList()` public
