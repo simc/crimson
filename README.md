@@ -65,7 +65,7 @@ void main() {
 
 That's it! You can now parse and serialize JSON with ease.
 
-### Ignoring fields
+## Ignoring fields
 
 Annotate properties with `@jsonIgnore` to ignore them:
 
@@ -81,7 +81,7 @@ class Tweet {
 }
 ```
 
-### Renaming fields
+## Renaming fields
 
 Use the `@JsonName()` annotation to rename individual fields:
 
@@ -128,7 +128,7 @@ enum PlaceType {
 }
 ```
 
-### Custom converters
+## Custom converters
 
 You can use custom converters to convert between JSON and Dart types. Just create a class that implements `JsonConverter<T>`.
 
