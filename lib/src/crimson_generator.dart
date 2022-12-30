@@ -329,7 +329,7 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
       writeObjectStart();
       for (final key in $name.keys) {
         writeObjectKey(key);
-        final ${name}Value = $name[key]!;
+        final ${name}Value = $name[key] ${type.mapParam.isNullable ? '' : '!'};
         ${_write('${name}Value', type.mapParam)}
       }
       writeObjectEnd();''';
