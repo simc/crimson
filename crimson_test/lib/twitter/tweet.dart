@@ -1,4 +1,5 @@
 import 'package:crimson/crimson.dart';
+import 'package:dart_json_mapper/dart_json_mapper.dart' as m;
 import 'package:json_annotation/json_annotation.dart';
 
 import 'entities.dart';
@@ -8,6 +9,7 @@ import 'user.dart';
 part 'tweet.g.dart';
 
 @JsonSerializable(createToJson: false)
+@m.jsonSerializable
 @json
 class Tweet {
   Tweet();
@@ -76,6 +78,7 @@ class Tweet {
 }
 
 @JsonSerializable(createToJson: false)
+@m.jsonSerializable
 @json
 class CurrentUserRetweet {
   CurrentUserRetweet();
@@ -87,6 +90,7 @@ class CurrentUserRetweet {
 }
 
 @JsonSerializable(createToJson: false)
+@m.jsonSerializable
 @json
 class QuotedStatusPermalink {
   QuotedStatusPermalink();

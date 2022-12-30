@@ -1,0 +1,9 @@
+targets:
+  $default:
+    builders:
+      dart_json_mapper:
+        generate_for:
+          - lib/bench.dart
+      reflectable:
+        generate_for:
+          - no/files

@@ -26,7 +26,7 @@
 ## Features
 
 - 🏎️ **Fast**: Like really fast. Crimson parses JSON in a single pass.
-- 🌻 **Easy to use**: Crimson is designed to be easy to use and understand.
+- 🌻 **Easy to use**: Crimson is designed to be easy to learn and use.
 - 💃 **Flexible**: Crimson can partially parse and serialize JSON.
 - 🥶 **Freezed support**: Crimson supports [freezed](https://pub.dev/packages/freezed) classes.
 - 🪶 **Lightweight**: Crimson is lightweight and has no third-party dependencies.
@@ -168,6 +168,49 @@ class Tweet with _$Tweet {
   }) = _Tweet;
 }
 ```
+
+## Benchmarks
+
+The following benchmarks give you an idea about the performance of Crimson. The benchmarks were run on a MacBook Pro M1 Pro with 32 GB of RAM using Twitter API data.
+
+<table>
+  <tr>
+    <td>
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/big_json_dark.png">
+        <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/big_json_light.png">
+        <img src="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/big_json_light.png">
+      </picture>
+      <p>Big JSON without whitespace</p>
+    </td>
+    <td>
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/big_json_whitespace_dark.png">
+        <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/big_json_whitespace_light.png">
+        <img src="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/big_json_whitespace_light.png">
+      </picture>
+      <p>Big JSON with whitespace</p>
+    </td>
+  </tr>
+  <tr>
+    <td>
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/medium_json_dark.png">
+        <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/medium_json_light.png">
+        <img src="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/medium_json_light.png">
+      </picture>
+      <p>Medium JSON without whitespace</p>
+    </td>
+    <td>
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/small_json_dark.png">
+        <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/small_json_light.png">
+        <img src="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/small_json_light.png">
+      </picture>
+      <p>Small JSON without whitespace</p>
+    </td>
+  </tr>
+</table>
 
 ### License
 

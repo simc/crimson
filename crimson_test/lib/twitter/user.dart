@@ -1,4 +1,5 @@
 import 'package:crimson/crimson.dart';
+import 'package:dart_json_mapper/dart_json_mapper.dart' as m;
 import 'package:json_annotation/json_annotation.dart';
 
 import 'entities.dart';
@@ -6,6 +7,7 @@ import 'entities.dart';
 part 'user.g.dart';
 
 @JsonSerializable(createToJson: false)
+@m.jsonSerializable
 @json
 class User {
   User();
@@ -56,6 +58,7 @@ class User {
 }
 
 @JsonSerializable(createToJson: false)
+@m.jsonSerializable
 @json
 class UserEntities {
   UserEntities();
@@ -69,6 +72,7 @@ class UserEntities {
 }
 
 @JsonSerializable(createToJson: false)
+@m.jsonSerializable
 @json
 class UserEntityUrl {
   UserEntityUrl();

@@ -1,9 +1,11 @@
 import 'package:crimson/crimson.dart';
+import 'package:dart_json_mapper/dart_json_mapper.dart' as m;
 import 'package:json_annotation/json_annotation.dart';
 
 part 'geo.g.dart';
 
 @JsonSerializable(createToJson: false)
+@m.jsonSerializable
 @json
 class Place {
   Place();
@@ -26,6 +28,7 @@ class Place {
 }
 
 @json
+@m.jsonSerializable
 enum PlaceType {
   admin,
   country,
@@ -35,6 +38,7 @@ enum PlaceType {
 }
 
 @JsonSerializable(createToJson: false)
+@m.jsonSerializable
 @json
 class Coordinates {
   Coordinates();

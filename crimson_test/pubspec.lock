@@ -140,7 +140,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.0.3"
+    version: "0.1.1"
   crypto:
     dependency: transitive
     description:
@@ -148,6 +148,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.2"
+  dart_json_mapper:
+    dependency: "direct main"
+    description:
+      name: dart_json_mapper
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.2.7+1"
   dart_style:
     dependency: transitive
     description:
@@ -323,6 +330,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.2.1"
+  reflectable:
+    dependency: transitive
+    description:
+      name: reflectable
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.0.4"
   shelf:
     dependency: transitive
     description:
