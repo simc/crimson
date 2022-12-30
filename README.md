@@ -171,43 +171,43 @@ class Tweet with _$Tweet {
 
 ## Benchmarks
 
-The following benchmarks give you an idea about the performance of Crimson. The benchmarks were run on a MacBook Pro M1 Pro with 32 GB of RAM using Twitter API data.
+The following benchmarks give you an idea about the parsing performance of Crimson. The benchmarks were run on a MacBook with M1 Pro and 32 GB of RAM using Twitter API data.
 
 <table>
   <tr>
-    <td>
+    <td align="center">
       <picture>
         <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/big_json_dark.png">
         <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/big_json_light.png">
         <img src="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/big_json_light.png">
       </picture>
-      <p>Big JSON without whitespace</p>
+      <b>Big JSON without whitespace</b>
     </td>
-    <td>
+    <td align="center">
       <picture>
         <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/big_json_whitespace_dark.png">
         <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/big_json_whitespace_light.png">
         <img src="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/big_json_whitespace_light.png">
       </picture>
-      <p>Big JSON with whitespace</p>
+      <b>Big JSON with whitespace</b>
     </td>
   </tr>
   <tr>
-    <td>
+    <td align="center">
       <picture>
         <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/medium_json_dark.png">
         <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/medium_json_light.png">
         <img src="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/medium_json_light.png">
       </picture>
-      <p>Medium JSON without whitespace</p>
+      <b>Medium JSON without whitespace</b>
     </td>
-    <td>
+    <td align="center">
       <picture>
         <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/small_json_dark.png">
         <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/small_json_light.png">
         <img src="https://raw.githubusercontent.com/simc/crimson/main/.github/benchmarks/small_json_light.png">
       </picture>
-      <p>Small JSON without whitespace</p>
+      <b>Small JSON without whitespace</b>
     </td>
   </tr>
 </table>
