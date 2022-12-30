@@ -2,7 +2,6 @@ import 'package:crimson/crimson.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'media.dart';
-import 'util.dart';
 
 part 'entities.g.dart';
 
@@ -49,9 +48,7 @@ class Poll {
 
   List<Option>? options;
 
-  @JsonKey(fromJson: convertTwitterDateTime)
-  @JsonConvert(fromJson: convertTwitterDateTime)
-  DateTime? end_datetime;
+  String? end_datetime;
 
   String? duration_minutes;
 }

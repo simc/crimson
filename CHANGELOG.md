@@ -1,6 +1,8 @@
 # 0.1.1
 
 - Fixed edge cases
+- Added verfication of data types
+- Minor performance improvements
 
 # 0.1.0
 

@@ -42,7 +42,7 @@ void main() {
 }
 
 int bench(void Function() f) {
-  for (var i = 0; i < 5; i++) {
+  for (var i = 0; i < 10; i++) {
     f();
   }
   final s = Stopwatch()..start();

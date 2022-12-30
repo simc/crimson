@@ -2,7 +2,6 @@ import 'package:crimson/crimson.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'entities.dart';
-import 'util.dart';
 
 part 'user.g.dart';
 
@@ -41,9 +40,7 @@ class User {
 
   int? statuses_count;
 
-  @JsonKey(fromJson: convertTwitterDateTime)
-  @JsonConvert(fromJson: convertTwitterDateTime)
-  DateTime? createt_at;
+  String? createt_at;
 
   String? profile_banner_url;
 

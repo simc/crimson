@@ -4,7 +4,6 @@ import 'package:json_annotation/json_annotation.dart';
 import 'entities.dart';
 import 'geo.dart';
 import 'user.dart';
-import 'util.dart';
 
 part 'tweet.g.dart';
 
@@ -15,9 +14,7 @@ class Tweet {
 
   factory Tweet.fromJson(Map<String, dynamic> json) => _$TweetFromJson(json);
 
-  @JsonKey(fromJson: convertTwitterDateTime)
-  @JsonConvert(fromJson: convertTwitterDateTime)
-  DateTime? created_at;
+  String? created_at;
 
   String? id_str;
 

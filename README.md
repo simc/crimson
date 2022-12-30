@@ -19,7 +19,7 @@
   </a>
 </p>
 
-<p align="center">Fast, efficient and easy-to-use JSON parser and serializer for Dart.</p>
+<p align="center">Fast, efficient and easy-to-use JSON parser and serializer for Dart.<br>Crimson does not verify your JSON!</p>
 
 > 🚧 **Crimson is still in early development and is not ready for production use. <br> Only parsing is supported for now** 🚧
 

@@ -28,26 +28,15 @@ class Crimson {
     );
   }
 
+  @pragma('vm:prefer-inline')
   void _skipWhitespace() {
-    final token = buffer[_offset];
-    if (token != tokenSpace &&
-        token != tokenLineFeed &&
-        token != tokenTab &&
-        token != tokenCarriageReturn) {
+    var i = _offset;
+    if (buffer[i] > tokenSpace) {
       return;
     }
 
-    var i = _offset;
-    while (true) {
-      final token = buffer[++i];
-      if (token != tokenSpace &&
-          token != tokenLineFeed &&
-          token != tokenTab &&
-          token != tokenCarriageReturn) {
-        _offset = i;
-        return;
-      }
-    }
+    while (buffer[++i] <= tokenSpace) {}
+    _offset = i;
   }
 
   /// Skips the next value.
@@ -216,7 +205,11 @@ class Crimson {
       i++;
     }
 
-    var value = 0;
+    var value = buffer[i++] ^ tokenZero;
+    if (value > 9) {
+      _error(i - 1, expected: 'number');
+    }
+
     while (true) {
       final digit = buffer[i++] ^ tokenZero;
       if (digit <= 9) {
@@ -270,12 +263,16 @@ class Crimson {
     var exponent = 0;
     // Added to exponent for each digit. Set to -1 when seeing '.'.
     var exponentDelta = 0;
-    var doubleValue = 0.0;
     var sign = 1.0;
 
     if (buffer[i] == tokenMinus) {
       sign = -1.0;
       i++;
+    }
+
+    var doubleValue = (buffer[i++] ^ tokenZero).toDouble();
+    if (doubleValue > 9) {
+      _error(i - 1, expected: 'number');
     }
 
     while (true) {
@@ -494,6 +491,7 @@ class Crimson {
   /// Reads a DateTime value. Supports both ISO 8601 and UNIX second and
   /// millisecond timestamps.
   DateTime readDateTime() {
+    final start = _offset;
     final value = read();
     if (value is String) {
       return DateTime.parse(value);
@@ -504,7 +502,7 @@ class Crimson {
         return DateTime.fromMillisecondsSinceEpoch(value.toInt() * 1000);
       }
     } else {
-      _error(_offset, expected: 'DateTime');
+      _error(start, expected: 'DateTime');
     }
   }
 
