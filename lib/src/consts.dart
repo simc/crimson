@@ -11,17 +11,23 @@ const tokenDoubleQuote = 0x22;
 const tokenSlash = 0x2F;
 const tokenBackslash = 0x5C;
 const tokenComma = 0x2C;
+const tokenPeriod = 0x2E;
 const tokenColon = 0x3A;
 const tokenLBracket = 0x5B;
 const tokenRBracket = 0x5D;
 const tokenLBrace = 0x7B;
 const tokenRBrace = 0x7D;
 
-const tokenT = 0x74;
-const tokenF = 0x66;
-const tokenN = 0x6E;
+const tokenA = 0x61;
 const tokenB = 0x62;
+const tokenE = 0x65;
+const tokenUpperE = 0x45;
+const tokenF = 0x66;
+const tokenL = 0x6C;
+const tokenN = 0x6E;
 const tokenR = 0x72;
+const tokenS = 0x73;
+const tokenT = 0x74;
 const tokenU = 0x75;
 
 const tokenZero = 0x30;
@@ -36,9 +42,6 @@ const tokenEight = 0x38;
 const tokenNine = 0x39;
 const tokenPlus = 0x2B;
 const tokenMinus = 0x2D;
-const tokenPeriod = 0x2E;
-const tokenE = 0x65;
-const tokenUpperE = 0x45;
 
 const powersOfTen = [
   1.0, // 0
@@ -65,5 +68,11 @@ const powersOfTen = [
   1000000000000000000000.0,
   10000000000000000000000.0,
 ];
+
+const int oneByteLimit = 0x7f; // 7 bits
+const int twoByteLimit = 0x7ff; // 11 bits
+const int surrogateTagMask = 0xFC00;
+const int surrogateValueMask = 0x3FF;
+const int leadSurrogateMin = 0xD800;
 
 const maxInt = 9223372036854775807;

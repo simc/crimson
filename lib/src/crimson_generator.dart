@@ -6,6 +6,7 @@ import 'package:analyzer/dart/element/type.dart';
 import 'package:build/build.dart';
 import 'package:crimson/crimson.dart';
 import 'package:crimson/src/annotations.dart';
+import 'package:crimson/src/consts.dart';
 import 'package:source_gen/source_gen.dart';
 
 const TypeChecker _jsonChecker = TypeChecker.fromRuntime(Json);
@@ -24,11 +25,17 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
     BuildStep buildStep,
   ) {
     if (element is ClassElement) {
-      return _generateClassDecode(element);
+      return '''
+      ${_generateClassEncode(element)}
+      ${_generateClassDecode(element)}
+      ''';
     } else if (element is EnumElement) {
       final field = annotation.read('enumField');
       final enumProperty = field.isNull ? 'name' : field.stringValue;
-      return _generateEnumDecode(element, enumProperty);
+      return '''
+      ${_generateEnumEncode(element, enumProperty)}
+      ${_generateEnumDecode(element, enumProperty)}
+      ''';
     } else {
       throw UnimplementedError();
     }
@@ -44,8 +51,7 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
       for (final param in defaultContstructor.parameters) param.name: param
     };
 
-    // hack to fix freezed names
-    final cls = element.displayName.replaceFirst(r'_$_', '');
+    final cls = element.cleanName;
     var code = 'extension Read$cls on Crimson {';
 
     code += '$cls read$cls() {';
@@ -110,28 +116,12 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
       }
     }
 
-    code += '';
-
     return '''
         $code
         return obj;
       }
 
-      List<$cls> read${cls}List() {
-        final list = <$cls>[];
-        while(iterList()) {
-          list.add(read$cls());
-        }
-        return list;
-      }
-
-      List<$cls?> read${cls}OrNullList() {
-        final list = <$cls?>[];
-        while(iterList()) {
-          list.add(skipNull() ? null : read$cls());
-        }
-        return list;
-      }
+      ${_generateListDecode(cls)}
     }''';
   }
 
@@ -182,21 +172,26 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
         return _${cls}Map[read()]!;
       }
 
-      List<$cls> read${cls}List() {
-        final list = <$cls>[];
-        while(iterList()) {
-          list.add(read$cls());
-        }
-        return list;
-      }
+      ${_generateListDecode(cls)}
+    }''';
+  }
 
-      List<$cls?> read${cls}OrNullList() {
-        final list = <$cls?>[];
-        while(iterList()) {
-          list.add(skipNull() ? null : read$cls());
-        }
-        return list;
+  String _generateListDecode(String cls) {
+    return '''
+    List<$cls> read${cls}List() {
+      final list = <$cls>[];
+      while(iterList()) {
+        list.add(read$cls());
       }
+      return list;
+    }
+
+    List<$cls?> read${cls}OrNullList() {
+      final list = <$cls?>[];
+      while(iterList()) {
+        list.add(skipNull() ? null : read$cls());
+      }
+      return list;
     }''';
   }
 
@@ -238,9 +233,138 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
 
     return code;
   }
+
+  String _generateClassEncode(ClassElement element) {
+    final accessors = element.allAccessors;
+
+    final cls = element.cleanName;
+    var code = '''
+    extension Write$cls on CrimsonWriter {
+      void write$cls($cls value) {
+        writeObjectStart();''';
+
+    for (final accessor in accessors) {
+      final raw = !accessor.jsonName.codeUnits
+          .any((e) => e == tokenDoubleQuote || e == tokenBackslash || e > 127);
+      if (raw) {
+        code += "writeObjectKeyRaw('${accessor.jsonName}');";
+      } else {
+        code += "writeObjectKey('${accessor.jsonName}');";
+      }
+      code += 'final ${accessor.name} = value.${accessor.name};';
+      code += _write(accessor.name, accessor.type);
+    }
+
+    return '''
+        $code
+        writeObjectEnd();
+      }
+
+      ${_generateListEncode(cls)}
+    }''';
+  }
+
+  String _generateEnumEncode(EnumElement enumClass, String propertyName) {
+    final cls = enumClass.name;
+    var code = '''
+    extension Write$cls on CrimsonWriter {
+      void write$cls($cls value) {''';
+
+    if (propertyName == 'name') {
+      code += 'writeString(value.name);';
+    } else {
+      final property = enumClass.getField(propertyName)!;
+      code += 'final enumValue = value.${property.name};';
+      code += _write('enumValue', property.type);
+    }
+
+    return '''
+        $code
+      }
+
+      ${_generateListEncode(cls)}
+    }''';
+  }
+
+  String _generateListEncode(String cls) {
+    return '''
+    void write${cls}List(List<$cls> list) {
+      writeListStart();
+      for (final value in list) {
+        write$cls(value);
+      }
+      writeListEnd();
+    }
+
+    void write${cls}OrNullList(List<$cls?> list) {
+      writeListStart();
+      for (final value in list) {
+        if (value == null) {
+          writeNull();
+        } else {
+          write$cls(value);
+        }
+      }
+      writeListEnd();
+    }''';
+  }
+
+  String _write(String name, DartType type) {
+    var code = '';
+    if (type.isNullable) {
+      code += '''
+      if ($name == null) {
+        writeNull();
+      } else {''';
+    }
+    if (type.isDartCoreList) {
+      code += '''
+      writeListStart();
+      for (final value in $name) {
+        ${_write('value', type.listParam)}
+      }
+      writeListEnd();''';
+    } else if (type.isDartCoreMap) {
+      code += '''
+      writeObjectStart();
+      for (final key in $name.keys) {
+        writeObjectKey(key);
+        final ${name}Value = $name[key]!;
+        ${_write('${name}Value', type.mapParam)}
+      }
+      writeObjectEnd();''';
+    } else if (type.isDartCoreDouble ||
+        type.isDartCoreInt ||
+        type.isDartCoreNum) {
+      code += 'writeNum($name);';
+    } else if (type.isDartCoreString) {
+      code += 'writeString($name);';
+    } else if (type.isDartCoreBool) {
+      code += 'writeBool($name);';
+    } else if (type.isDynamic) {
+      code += 'write($name);';
+    } else if (type.element?.name == 'DateTime') {
+      code += 'writeString($name.toIso8601String());';
+    } else if (type.hasJsonAnnotation) {
+      code += 'write${type.element!.name}($name);';
+    } else {
+      code += 'write($name.toJson());';
+    }
+
+    if (type.isNullable) {
+      code += '}';
+    }
+
+    return code;
+  }
 }
 
 extension on ClassElement {
+  String get cleanName {
+    // hack to fix freezed names
+    return displayName.replaceFirst(r'_$_', '');
+  }
+
   List<PropertyInducingElement> get allAccessors {
     final accessorNames = <String>{};
     return [

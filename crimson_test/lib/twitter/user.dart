@@ -6,13 +6,15 @@ import 'entities.dart';
 
 part 'user.g.dart';
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 @m.jsonSerializable
 @json
 class User {
   User();
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UserToJson(this);
 
   String? id_str;
 
@@ -57,7 +59,7 @@ class User {
   String? withheld_scope;
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 @m.jsonSerializable
 @json
 class UserEntities {
@@ -66,12 +68,14 @@ class UserEntities {
   factory UserEntities.fromJson(Map<String, dynamic> json) =>
       _$UserEntitiesFromJson(json);
 
+  Map<String, dynamic> toJson() => _$UserEntitiesToJson(this);
+
   UserEntityUrl? url;
 
   UserEntityUrl? description;
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 @m.jsonSerializable
 @json
 class UserEntityUrl {
@@ -79,6 +83,8 @@ class UserEntityUrl {
 
   factory UserEntityUrl.fromJson(Map<String, dynamic> json) =>
       _$UserEntityUrlFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UserEntityUrlToJson(this);
 
   List<Url>? urls;
 }

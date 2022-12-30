@@ -1,3 +1,12 @@
+# 0.2.0
+
+- Support for serializing JSON
+
+# 0.1.2
+
+- Small improvements
+- Updated readme
+
 # 0.1.1
 
 - Fixed edge cases

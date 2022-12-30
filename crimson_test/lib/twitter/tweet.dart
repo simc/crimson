@@ -8,13 +8,15 @@ import 'user.dart';
 
 part 'tweet.g.dart';
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 @m.jsonSerializable
 @json
 class Tweet {
   Tweet();
 
   factory Tweet.fromJson(Map<String, dynamic> json) => _$TweetFromJson(json);
+
+  Map<String, dynamic> toJson() => _$TweetToJson(this);
 
   String? created_at;
 
@@ -77,7 +79,7 @@ class Tweet {
   List<int>? display_text_range;
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 @m.jsonSerializable
 @json
 class CurrentUserRetweet {
@@ -86,10 +88,12 @@ class CurrentUserRetweet {
   factory CurrentUserRetweet.fromJson(Map<String, dynamic> json) =>
       _$CurrentUserRetweetFromJson(json);
 
+  Map<String, dynamic> toJson() => _$CurrentUserRetweetToJson(this);
+
   String? id_str;
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 @m.jsonSerializable
 @json
 class QuotedStatusPermalink {
@@ -97,6 +101,8 @@ class QuotedStatusPermalink {
 
   factory QuotedStatusPermalink.fromJson(Map<String, dynamic> json) =>
       _$QuotedStatusPermalinkFromJson(json);
+
+  Map<String, dynamic> toJson() => _$QuotedStatusPermalinkToJson(this);
 
   String? url;
 

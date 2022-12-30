@@ -21,7 +21,7 @@
 
 <p align="center">Fast, efficient and easy-to-use JSON parser and serializer for Dart.<br>Crimson does not verify your JSON!</p>
 
-> 🚧 **Crimson is still in early development and is not ready for production use. <br> Only parsing is supported for now** 🚧
+> 🚧 **Crimson is still in early development and is not ready for production use.** 🚧
 
 ## Features
 
@@ -57,15 +57,19 @@ import 'package:crimson/crimson.dart';
 
 void main() {
   final jsonBytes = downloadTweets();
-  final crimson = Crimson(jsonBytes);
 
-  final tweets = crimson.parseTweetList();
+  final crimson = Crimson(jsonBytes);
+  final tweets = crimson.readTweetList();
+
+  final writer = CrimsonWriter();
+  writer.writeTweetList(tweets);
+  final bytes = writer.toBytes();
 }
 ```
 
 That's it! You can now parse and serialize JSON with ease.
 
-## Ignoring fields
+## Ignoring JSON fields
 
 Annotate properties with `@jsonIgnore` to ignore them:
 
@@ -81,7 +85,7 @@ class Tweet {
 }
 ```
 
-## Renaming fields
+## Renaming JSON fields
 
 Use the `@JsonName()` annotation to rename individual fields:
 
@@ -128,9 +132,9 @@ enum PlaceType {
 }
 ```
 
-## Custom converters
+## Custom JSON converters
 
-You can use custom converters to convert between JSON and Dart types using the `@JsonConvert()` annotation:
+You can use custom JSON converters to convert between JSON and Dart types using the `@JsonConvert()` annotation:
 
 ```dart
 @json
@@ -169,9 +173,9 @@ class Tweet with _$Tweet {
 }
 ```
 
-## Benchmarks
+## JSON Benchmarks
 
-The following benchmarks give you an idea about the parsing performance of Crimson. The benchmarks were run on a MacBook with M1 Pro and 32 GB of RAM using Twitter API data.
+The following benchmarks give you an idea about the JSON parsing performance of Crimson. The benchmarks were run on a MacBook with M1 Pro and 32 GB of RAM using Twitter API data.
 
 <table>
   <tr>

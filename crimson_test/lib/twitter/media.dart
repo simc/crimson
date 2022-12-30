@@ -4,13 +4,15 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'media.g.dart';
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 @m.jsonSerializable
 @json
 class Media {
   Media();
 
   factory Media.fromJson(Map<String, dynamic> json) => _$MediaFromJson(json);
+
+  Map<String, dynamic> toJson() => _$MediaToJson(this);
 
   String? display_url;
 
@@ -37,13 +39,15 @@ class Media {
   AdditionalMediaInfo? additional_mediaInfo;
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 @m.jsonSerializable
 @json
 class Sizes {
   Sizes();
 
   factory Sizes.fromJson(Map<String, dynamic> json) => _$SizesFromJson(json);
+
+  Map<String, dynamic> toJson() => _$SizesToJson(this);
 
   Size? thumb;
 
@@ -54,13 +58,15 @@ class Sizes {
   Size? large;
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 @m.jsonSerializable
 @json
 class Size {
   Size();
 
   factory Size.fromJson(Map<String, dynamic> json) => _$SizeFromJson(json);
+
+  Map<String, dynamic> toJson() => _$SizeToJson(this);
 
   int? w;
 
@@ -69,7 +75,7 @@ class Size {
   String? resize;
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 @m.jsonSerializable
 @json
 class AdditionalMediaInfo {
@@ -77,6 +83,8 @@ class AdditionalMediaInfo {
 
   factory AdditionalMediaInfo.fromJson(Map<String, dynamic> json) =>
       _$AdditionalMediaInfoFromJson(json);
+
+  Map<String, dynamic> toJson() => _$AdditionalMediaInfoToJson(this);
 
   String? title;
 
@@ -87,7 +95,7 @@ class AdditionalMediaInfo {
   bool? monetizable;
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 @m.jsonSerializable
 @json
 class VideoInfo {
@@ -96,6 +104,8 @@ class VideoInfo {
   factory VideoInfo.fromJson(Map<String, dynamic> json) =>
       _$VideoInfoFromJson(json);
 
+  Map<String, dynamic> toJson() => _$VideoInfoToJson(this);
+
   List<int>? aspect_ratio;
 
   int? duration_millis;
@@ -103,7 +113,7 @@ class VideoInfo {
   List<Variant>? variants;
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 @m.jsonSerializable
 @json
 class Variant {
@@ -111,6 +121,8 @@ class Variant {
 
   factory Variant.fromJson(Map<String, dynamic> json) =>
       _$VariantFromJson(json);
+
+  Map<String, dynamic> toJson() => _$VariantToJson(this);
 
   int? bitrate;
 

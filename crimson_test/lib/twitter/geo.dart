@@ -4,13 +4,15 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'geo.g.dart';
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 @m.jsonSerializable
 @json
 class Place {
   Place();
 
   factory Place.fromJson(Map<String, dynamic> json) => _$PlaceFromJson(json);
+
+  Map<String, dynamic> toJson() => _$PlaceToJson(this);
 
   String? id;
 
@@ -37,7 +39,7 @@ enum PlaceType {
   neighborhood;
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 @m.jsonSerializable
 @json
 class Coordinates {
@@ -45,6 +47,8 @@ class Coordinates {
 
   factory Coordinates.fromJson(Map<String, dynamic> json) =>
       _$CoordinatesFromJson(json);
+
+  Map<String, dynamic> toJson() => _$CoordinatesToJson(this);
 
   List<double>? coordinates;
 

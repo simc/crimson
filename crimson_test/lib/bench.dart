@@ -12,40 +12,68 @@ void main() {
   final bytes = File('twitter.json').readAsBytesSync();
   final json = c.json.fuse(c.utf8).decode(bytes) as List;
 
-  print('Benchmarking Crimson and json_serializable decoding...');
-  runBenchmark('Big JSON without whitespace', bytes);
-
   final prettyJson = c.JsonEncoder.withIndent('    ').convert(json);
   final prettyJsonBytes = c.utf8.encode(prettyJson);
-  runBenchmark('Big JSON with whitespace', prettyJsonBytes);
 
   final mediumJson = json.sublist(0, 500);
   final mediumJsonBytes = c.utf8.encode(c.json.encode(mediumJson));
-  runBenchmark('Medium JSON without whitespace', mediumJsonBytes);
 
   final smallJson = json.sublist(0, 50);
   final smallJsonBytes = c.utf8.encode(c.json.encode(smallJson));
-  runBenchmark('Small JSON without whitespace', smallJsonBytes);
+
+  print('Benchmarking encoding...');
+  runEncodeBenchmark('Big JSON', bytes);
+  runEncodeBenchmark('Medium JSON', mediumJsonBytes);
+  runEncodeBenchmark('Small JSON', smallJsonBytes);
+
+  print('\nBenchmarking decoding...');
+  runDecodeBenchmark('Big JSON without whitespace', bytes);
+  runDecodeBenchmark('Big JSON with whitespace', prettyJsonBytes);
+  runDecodeBenchmark('Medium JSON without whitespace', mediumJsonBytes);
+  runDecodeBenchmark('Small JSON without whitespace', smallJsonBytes);
 }
 
-void runBenchmark(String name, List<int> jsonBytes) {
+void runEncodeBenchmark(String name, List<int> jsonBytes) {
+  final tweets = Crimson(jsonBytes).readTweetList();
+  print('\n-- $name --');
+
+  final crimson = bench(() {
+    final w = CrimsonWriter();
+    w.writeTweetList(tweets);
+  });
+  print('Crimson:             ${formatTime(crimson)}');
+
+  final jsonSerialize = bench(() {
+    final json = tweets.map((e) => e.toJson()).toList();
+    c.json.fuse(c.utf8).encode(json);
+  });
+  print('json_serialize:      ${formatTime(jsonSerialize)}');
+
+  final jsonMapper = bench(() {
+    final json = tweets.map((e) => JsonMapper.serialize(e)).toList();
+    c.json.fuse(c.utf8).encode(json);
+  }, times: 2);
+  print('dart_json_mapper:    ${formatTime(jsonMapper)}');
+}
+
+void runDecodeBenchmark(String name, List<int> jsonBytes) {
+  print('\n-- $name --');
+
   final crimson = bench(() {
     Crimson(jsonBytes).readTweetList();
   });
+  print('Crimson:             ${formatTime(crimson)}');
 
   final jsonSerialize = bench(() {
     final list = c.json.fuse(c.utf8).decode(jsonBytes) as List;
     list.map((e) => Tweet.fromJson(e as Map<String, dynamic>)).toList();
   });
+  print('json_serialize:      ${formatTime(jsonSerialize)}');
 
   final jsonMapper = bench(() {
     final list = c.json.fuse(c.utf8).decode(jsonBytes) as List;
     list.map((e) => JsonMapper.deserialize<Tweet>(e)).toList();
   }, times: 2);
-
-  print('\n-- $name --');
-  print('Crimson:             ${formatTime(crimson)}');
-  print('json_serialize:      ${formatTime(jsonSerialize)}');
   print('dart_json_mapper:    ${formatTime(jsonMapper)}');
 }
 

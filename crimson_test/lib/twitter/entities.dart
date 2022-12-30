@@ -6,7 +6,7 @@ import 'media.dart';
 
 part 'entities.g.dart';
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 @m.jsonSerializable
 @json
 class Entities {
@@ -14,6 +14,8 @@ class Entities {
 
   factory Entities.fromJson(Map<String, dynamic> json) =>
       _$EntitiesFromJson(json);
+
+  Map<String, dynamic> toJson() => _$EntitiesToJson(this);
 
   List<Hashtag>? hashtags;
 
@@ -28,7 +30,7 @@ class Entities {
   List<Poll>? polls;
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 @m.jsonSerializable
 @json
 class Hashtag {
@@ -37,18 +39,22 @@ class Hashtag {
   factory Hashtag.fromJson(Map<String, dynamic> json) =>
       _$HashtagFromJson(json);
 
+  Map<String, dynamic> toJson() => _$HashtagToJson(this);
+
   List<int>? indices;
 
   String? text;
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 @m.jsonSerializable
 @json
 class Poll {
   Poll();
 
   factory Poll.fromJson(Map<String, dynamic> json) => _$PollFromJson(json);
+
+  Map<String, dynamic> toJson() => _$PollToJson(this);
 
   List<Option>? options;
 
@@ -57,7 +63,7 @@ class Poll {
   String? duration_minutes;
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 @m.jsonSerializable
 @json
 class Option {
@@ -65,12 +71,14 @@ class Option {
 
   factory Option.fromJson(Map<String, dynamic> json) => _$OptionFromJson(json);
 
+  Map<String, dynamic> toJson() => _$OptionToJson(this);
+
   int? position;
 
   String? text;
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 @m.jsonSerializable
 @json
 class Symbol {
@@ -78,18 +86,22 @@ class Symbol {
 
   factory Symbol.fromJson(Map<String, dynamic> json) => _$SymbolFromJson(json);
 
+  Map<String, dynamic> toJson() => _$SymbolToJson(this);
+
   List<int>? indices;
 
   String? text;
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 @m.jsonSerializable
 @json
 class Url {
   Url();
 
   factory Url.fromJson(Map<String, dynamic> json) => _$UrlFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UrlToJson(this);
 
   String? display_url;
 
@@ -100,7 +112,7 @@ class Url {
   String? url;
 }
 
-@JsonSerializable(createToJson: false)
+@JsonSerializable()
 @m.jsonSerializable
 @json
 class UserMention {
@@ -108,6 +120,8 @@ class UserMention {
 
   factory UserMention.fromJson(Map<String, dynamic> json) =>
       _$UserMentionFromJson(json);
+
+  Map<String, dynamic> toJson() => _$UserMentionToJson(this);
 
   String? id_str;
 
