@@ -1,4 +1,5 @@
-name: bench
+name: crimson_test
+publish_to: none
 
 environment:
   sdk: ">=2.18.4 <3.0.0"

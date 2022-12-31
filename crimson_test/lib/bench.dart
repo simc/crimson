@@ -1,7 +1,7 @@
 import 'dart:convert' as c;
 import 'dart:io';
 
-import 'package:bench/bench.mapper.g.dart';
+import 'package:crimson_test/bench.mapper.g.dart';
 import 'package:crimson/crimson.dart';
 import 'package:dart_json_mapper/dart_json_mapper.dart';
 
