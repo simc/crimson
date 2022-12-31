@@ -1,8 +1,10 @@
 // ignore_for_file: avoid_js_rounded_ints
 
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:crimson/src/consts.dart';
+import 'package:crimson/src/json_type.dart';
 
 /// Crimson is a JSON parser that is optimized for speed.
 class Crimson {
@@ -22,7 +24,7 @@ class Crimson {
     throw FormatException(
       'Unexpected token: '
       '${expected != null ? 'expected $expected actual: ' : ''}'
-      '${String.fromCharCodes(buffer, offset, offset + 20)}',
+      '${String.fromCharCodes(buffer, offset, offset + 5)}',
       buffer,
       offset,
     );
@@ -37,6 +39,26 @@ class Crimson {
 
     while (buffer[++i] <= tokenSpace) {}
     _offset = i;
+  }
+
+  /// Returns the type of the next value without consuming it.
+  JsonType whatIsNext() {
+    _skipWhitespace();
+    switch (buffer[_offset]) {
+      case tokenDoubleQuote:
+        return JsonType.string;
+      case tokenT:
+      case tokenF:
+        return JsonType.bool;
+      case tokenN:
+        return JsonType.nil;
+      case tokenLBrace:
+        return JsonType.object;
+      case tokenLBracket:
+        return JsonType.array;
+      default:
+        return JsonType.number;
+    }
   }
 
   /// Skips the next value.
@@ -56,7 +78,7 @@ class Crimson {
         _offset += 3;
         break;
       case tokenLBracket:
-        skipPartialList();
+        skipPartialArray();
         break;
       case tokenLBrace:
         skipPartialObject();
@@ -114,7 +136,7 @@ class Crimson {
   }
 
   /// Skips the remaining values in the current list.
-  void skipPartialList() {
+  void skipPartialArray() {
     var level = 1;
     var i = _offset;
     while (true) {
@@ -139,7 +161,7 @@ class Crimson {
     }
   }
 
-  /// Skips the remaining values in the current object.
+  /// Skips the remaining values in the current map.
   void skipPartialObject() {
     var level = 1;
     var i = _offset;
@@ -381,35 +403,14 @@ class Crimson {
         return String.fromCharCodes(strBuf, 0, si);
       }
       if (bc == tokenBackslash) {
-        bc = buffer[i++];
-        switch (bc) {
-          case tokenB:
-            bc = tokenBackspace;
-            break;
-          case tokenT:
-            bc = tokenTab;
-            break;
-          case tokenN:
-            bc = tokenLineFeed;
-            break;
-          case tokenF:
-            bc = tokenFormFeed;
-            break;
-          case tokenR:
-            bc = tokenCarriageReturn;
-            break;
-          case tokenDoubleQuote:
-          case tokenSlash:
-          case tokenBackslash:
-            break;
-          case tokenU:
-            bc = (_parseHexDigit(i++) << 12) +
-                (_parseHexDigit(i++) << 8) +
-                (_parseHexDigit(i++) << 4) +
-                _parseHexDigit(i++);
-            break;
-          default:
-            _error(i - 1, expected: 'valid escape sequence');
+        final nextChar = buffer[i++];
+        if (nextChar == tokenU) {
+          bc = (_parseHexDigit(i++) << 12) +
+              (_parseHexDigit(i++) << 8) +
+              (_parseHexDigit(i++) << 4) +
+              _parseHexDigit(i++);
+        } else {
+          bc = _readEscapeSequence(nextChar);
         }
       } else if ((bc & 0x80) != 0) {
         final u2 = buffer[i++];
@@ -448,6 +449,28 @@ class Crimson {
     }
   }
 
+  @pragma('vm:prefer-inline')
+  int _readEscapeSequence(int char) {
+    switch (char) {
+      case tokenB:
+        return tokenBackspace;
+      case tokenT:
+        return tokenTab;
+      case tokenN:
+        return tokenLineFeed;
+      case tokenF:
+        return tokenFormFeed;
+      case tokenR:
+        return tokenCarriageReturn;
+      case tokenDoubleQuote:
+      case tokenSlash:
+      case tokenBackslash:
+        return char;
+      default:
+        _error(_offset - 1, expected: 'valid escape sequence');
+    }
+  }
+
   int _parseHexDigit(int offset) {
     final char = buffer[offset];
     final digit = char ^ 0x30;
@@ -476,14 +499,14 @@ class Crimson {
     var i = _offset + 1;
     var hash = 0xcbf29ce484222325;
     while (true) {
-      final c = buffer[i++];
+      var c = buffer[i++];
       if (c == tokenDoubleQuote) {
         _offset = i;
         return hash;
+      } else if (c == tokenBackslash) {
+        c = _readEscapeSequence(buffer[i++]);
       }
-      hash ^= c >> 8;
-      hash *= 0x100000001b3;
-      hash ^= c & 0xFF;
+      hash ^= c;
       hash *= 0x100000001b3;
     }
   }
@@ -509,7 +532,7 @@ class Crimson {
   /// Allows iterating a list value without allocating a [List].
   ///
   /// Returns `true` if there is another element in the list.
-  bool iterList() {
+  bool iterArray() {
     _skipWhitespace();
     switch (buffer[_offset++]) {
       case tokenLBracket:
@@ -565,16 +588,16 @@ class Crimson {
   int iterObjectHash() => _iterObject(_readStringHash, -1);
 
   /// Convenience method to read a list.
-  List<dynamic> readList() {
+  List<dynamic> readArray() {
     final list = <dynamic>[];
-    while (iterList()) {
+    while (iterArray()) {
       list.add(read());
     }
     return list;
   }
 
   /// Convenience method to read a map.
-  Map<String, dynamic> readMap() {
+  Map<String, dynamic> readObject() {
     final map = <String, dynamic>{};
     for (var field = iterObject(); field != null; field = iterObject()) {
       map[field] = read();
@@ -599,9 +622,9 @@ class Crimson {
         _offset += 4;
         return null;
       case tokenLBracket:
-        return readList();
+        return readArray();
       case tokenLBrace:
-        return readMap();
+        return readObject();
       default:
         return _readNum();
     }
@@ -609,18 +632,15 @@ class Crimson {
 
   /// Hashes the given String with the same algorithm as [readStringHash] and
   /// [iterObjectHash].
+  ///
+  /// This method should only be used at compile-time since it is not very fast.
   static int hash(String string) {
+    final bytes = utf8.encode(string);
     var hash = 0xcbf29ce484222325;
-
-    var i = 0;
-    while (i < string.length) {
-      final codeUnit = string.codeUnitAt(i++);
-      hash ^= codeUnit >> 8;
-      hash *= 0x100000001b3;
-      hash ^= codeUnit & 0xFF;
+    for (var i = 0; i < bytes.length; i++) {
+      hash ^= bytes[i];
       hash *= 0x100000001b3;
     }
-
     return hash;
   }
 }

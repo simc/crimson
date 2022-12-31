@@ -1,6 +1,10 @@
 # 0.2.0
 
-- Support for serializing JSON
+- Experimental support for serializing JSON
+- Support for Sets
+- Support for escape sequences in object keys
+- Support for JSON pointers (RFC 6901)
+- Added crimson.whatIsNext() to get the next value type
 
 # 0.1.2
 

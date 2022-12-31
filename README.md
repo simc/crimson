@@ -132,6 +132,45 @@ enum PlaceType {
 }
 ```
 
+## JSON Pointers
+
+Crimson supports [RFC 6901 JSON pointers](https://www.rfc-editor.org/rfc/rfc6901) to access nested JSON fields:
+
+```json
+{
+  "user": {
+    "name": "Simon Choi"
+  },
+  "tweets": [
+    {
+      "text": "Hello World!"
+    },
+    {
+      "text": "Hello Crimson!"
+    }
+  ]
+}
+```
+
+We can access the `name` field of the `user` object and the `text` field of the second tweet by providing a JSON pointer:
+
+```dart
+@json
+class Tweet {
+  @JsonName('/user/name')
+  String? userName;
+
+  @JsonName('/tweets/1/text')
+  String? secondTweet;
+}
+```
+
+JSON pointers are evaluated at compile time and optimized code is generated so there is no runtime overhead.
+
+Fields using JSON pointers are ignored for serialization.
+
+**Important**: You can only use a pointer prefix once in a class. For example, you can't use `/user` and `/user/name` in the same class.
+
 ## Custom JSON converters
 
 You can use custom JSON converters to convert between JSON and Dart types using the `@JsonConvert()` annotation:

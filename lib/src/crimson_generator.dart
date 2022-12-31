@@ -71,19 +71,34 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
           break loop;''';
     for (final accessor in accessors) {
       final names = [accessor.jsonName, ...accessor.jsonAliases];
-      final fromJson = accessor.fromJson;
-      final type = fromJson?.parameters.first.type ?? accessor.type;
-      var value = _read(type);
-      if (fromJson != null) {
-        value = '${fromJson.name}($value)';
-      }
-
       for (final name in names) {
-        code += 'case ${Crimson.hash(name)}: // $name\n';
+        final pointer = _pointer(name);
+        code +=
+            'case ${Crimson.hash(pointer[0].toString())}: // ${pointer[0]}\n';
+
+        final fromJson = accessor.fromJson;
+        final type = fromJson?.parameters.first.type ?? accessor.type;
+        var value = _read(type);
+        if (fromJson != null) {
+          value = '${fromJson.name}($value)';
+        }
+        if (pointer.length > 1) {
+          var read = '${accessor.name} = $value;';
+          for (final segment in pointer.skip(1).toList().reversed) {
+            read = _generateReadSegment(segment, read);
+          }
+
+          code += '''
+            $read
+          else {
+            skip();
+          }''';
+        } else {
+          code += '${accessor.name} = $value;';
+        }
+
+        code += 'break;';
       }
-      code += '''
-      ${accessor.name} = $value;
-      break;''';
     }
     code += '''
       default:
@@ -123,6 +138,39 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
 
       ${_generateListDecode(cls)}
     }''';
+  }
+
+  String _generateReadSegment(dynamic segment, String read) {
+    var code = '''
+    final nextType = whatIsNext();
+    if (nextType == JsonType.object) {
+      for (var hash = iterObjectHash(); hash != -1; hash = iterObjectHash()) {
+        if (hash == ${Crimson.hash(segment.toString())}) /* $segment */ {
+          $read
+          skipPartialObject();
+          break;
+        } else {
+          skip();
+        }
+      }
+    }''';
+
+    if (segment is int) {
+      code += '''
+      else if (nextType == JsonType.array) {
+        for (var i = 0; i <= $segment && iterArray(); i++) {
+          if (i == $segment) {
+            $read
+            skipPartialArray();
+            break;
+          } else {
+            skip();
+          }
+        }
+      }''';
+    }
+
+    return code;
   }
 
   String _generateEnumDecode(EnumElement enumClass, String propertyName) {
@@ -180,7 +228,7 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
     return '''
     List<$cls> read${cls}List() {
       final list = <$cls>[];
-      while(iterList()) {
+      while(iterArray()) {
         list.add(read$cls());
       }
       return list;
@@ -188,7 +236,7 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
 
     List<$cls?> read${cls}OrNullList() {
       final list = <$cls?>[];
-      while(iterList()) {
+      while(iterArray()) {
         list.add(skipNull() ? null : read$cls());
       }
       return list;
@@ -199,13 +247,13 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
     var code = '';
     final orNull = type.isNullable ? 'OrNull' : '';
     final skipNull = type.isNullable ? 'skipNull() ? null : ' : '';
-    if (type.isDartCoreList) {
+    if (type.isDartCoreList || type.isDartCoreSet) {
       code += '''
       $skipNull
-      [
-        for(;iterList();)
+      ${type.isDartCoreList ? '[' : '{'}
+        for(;iterArray();)
           ${_read(type.listParam)},
-      ]''';
+      ${type.isDartCoreList ? ']' : '}'}''';
     } else if (type.isDartCoreMap) {
       code += '''
       $skipNull
@@ -244,6 +292,10 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
         writeObjectStart();''';
 
     for (final accessor in accessors) {
+      if (accessor.jsonName.startsWith('/')) {
+        continue; // we don't support serializing nested objects
+      }
+
       final raw = !accessor.jsonName.codeUnits
           .any((e) => e == tokenDoubleQuote || e == tokenBackslash || e > 127);
       if (raw) {
@@ -289,15 +341,15 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
   String _generateListEncode(String cls) {
     return '''
     void write${cls}List(List<$cls> list) {
-      writeListStart();
+      writeArrayStart();
       for (final value in list) {
         write$cls(value);
       }
-      writeListEnd();
+      writeArrayEnd();
     }
 
     void write${cls}OrNullList(List<$cls?> list) {
-      writeListStart();
+      writeArrayStart();
       for (final value in list) {
         if (value == null) {
           writeNull();
@@ -305,7 +357,7 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
           write$cls(value);
         }
       }
-      writeListEnd();
+      writeArrayEnd();
     }''';
   }
 
@@ -317,13 +369,13 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
         writeNull();
       } else {''';
     }
-    if (type.isDartCoreList) {
+    if (type.isDartCoreList || type.isDartCoreSet) {
       code += '''
-      writeListStart();
+      writeArrayStart();
       for (final value in $name) {
         ${_write('value', type.listParam)}
       }
-      writeListEnd();''';
+      writeArrayEnd();''';
     } else if (type.isDartCoreMap) {
       code += '''
       writeObjectStart();
@@ -459,4 +511,15 @@ extension on PropertyInducingElement {
 
 Never _err(String msg, [Element? element]) {
   throw InvalidGenerationSourceError(msg, element: element);
+}
+
+List<dynamic> _pointer(String pointer) {
+  if (!pointer.startsWith('/')) {
+    return [pointer];
+  }
+
+  return pointer.substring(1).split('/').map((e) {
+    final replaced = e.replaceAll('~0', '~').replaceAll('~1', '/');
+    return int.tryParse(replaced) ?? replaced;
+  }).toList();
 }

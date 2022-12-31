@@ -67,13 +67,13 @@ class CrimsonWriter {
 
   /// Start a new JSON array.
   @pragma('vm:prefer-inline')
-  void writeListStart() {
+  void writeArrayStart() {
     _writeByte(tokenLBracket);
   }
 
   /// End the current JSON array.
   @pragma('vm:prefer-inline')
-  void writeListEnd() {
+  void writeArrayEnd() {
     if (_buffer[_offset - 1] == tokenComma) {
       _buffer[_offset - 1] = tokenRBracket;
       _writeByte(tokenComma);
@@ -183,6 +183,44 @@ class CrimsonWriter {
       _buffer[_offset++] = str.codeUnitAt(i);
     }
     _buffer[_offset++] = tokenComma;
+  }
+
+  /// Write a list.
+  void writeArray(List<dynamic> value) {
+    writeArrayStart();
+    for (final item in value) {
+      write(item);
+    }
+    writeArrayEnd();
+  }
+
+  /// Write a map.
+  void writeObject(Map<String, dynamic> value) {
+    writeObjectStart();
+    for (final key in value.keys) {
+      writeObjectKey(key);
+      write(value[key]);
+    }
+    writeObjectEnd();
+  }
+
+  /// Write any value.
+  void write(dynamic value) {
+    if (value == null) {
+      writeNull();
+    } else if (value is bool) {
+      writeBool(value);
+    } else if (value is num) {
+      writeNum(value);
+    } else if (value is String) {
+      writeString(value);
+    } else if (value is List) {
+      writeArray(value);
+    } else if (value is Map<String, dynamic>) {
+      writeObject(value);
+    } else {
+      throw ArgumentError('Unsupported type: ${value.runtimeType}');
+    }
   }
 
   /// Convert the internal buffer to a [Uint8List].
