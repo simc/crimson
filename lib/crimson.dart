@@ -1,3 +1,4 @@
+/// Fast, efficient and easy-to-use JSON parser and serializer for Dart.
 library crimson;
 
 export 'src/annotations.dart' hide JsonIgnore, JsonKebabCase, JsonSnakeCase;

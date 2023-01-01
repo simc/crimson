@@ -432,7 +432,7 @@ class Crimson {
               final sup = bc - 0x10000;
               if (si >= strBuf.length - 1) {
                 strBuf = Uint16List((strBuf.length * 1.5).toInt())
-                  ..setAll(0, _stringBuffer);
+                  ..setRange(0, si, strBuf);
               }
               strBuf[si++] = (sup >>> 10) + 0xd800;
               strBuf[si++] = (sup & 0x3ff) + 0xdc00;
@@ -442,8 +442,7 @@ class Crimson {
         }
       }
       if (si == strBuf.length) {
-        strBuf = Uint16List((strBuf.length * 1.5).toInt())
-          ..setAll(0, _stringBuffer);
+        strBuf = Uint16List((strBuf.length * 1.5).toInt())..setAll(0, strBuf);
       }
       strBuf[si++] = bc;
     }

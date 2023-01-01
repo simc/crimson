@@ -69,10 +69,10 @@ const powersOfTen = [
   10000000000000000000000.0,
 ];
 
-const int oneByteLimit = 0x7f; // 7 bits
-const int twoByteLimit = 0x7ff; // 11 bits
-const int surrogateTagMask = 0xFC00;
-const int surrogateValueMask = 0x3FF;
-const int leadSurrogateMin = 0xD800;
+const oneByteLimit = 0x7f; // 7 bits
+const twoByteLimit = 0x7ff; // 11 bits
+const surrogateTagMask = 0xFC00;
+const surrogateValueMask = 0x3FF;
+const leadSurrogateMin = 0xD800;
 
 const maxInt = 9223372036854775807;

@@ -1,3 +1,10 @@
+# 0.2.1
+
+- Fixed decoding of long Strings
+- Improved default value handling
+- Added default enum value if no value is found
+- Improved code generation
+
 # 0.2.0
 
 - Experimental support for serializing JSON
