@@ -258,7 +258,7 @@ The following benchmarks give you an idea about the JSON parsing performance of 
 ### License
 
 ```
-Copyright 2022 Simon Choi
+Copyright 2023 Simon Choi
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
