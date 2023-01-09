@@ -22,33 +22,33 @@ void main() {
           'a': {
             'list': [
               {
-                'deep': {'list': [], 'map': {}}
+                'deep': {'list':<dynamic>[], 'map': <String, dynamic>{},}
               }
             ],
-            'map': {}
+            'map': <String, dynamic>{},
           },
-          'b': {'list': [], 'map': {}}
+          'b': {'list':<dynamic>[], 'map': <String, dynamic>{},}
         },
         {
-          'b': {'list': [], 'map': {}},
-          'c': {'list': [], 'map': {}}
+          'b': {'list':<dynamic>[], 'map': <String, dynamic>{},},
+          'c': {'list':<dynamic>[], 'map': <String, dynamic>{},}
         },
       ],
       'map': {
         'a': [
           {
-            'list': [],
+            'list':<dynamic>[],
             'map': {
               'deep2': [
-                {'list': [], 'map': {}}
+                {'list':<dynamic>[], 'map':<String, dynamic>{}}
               ]
             }
           },
-          {'list': [], 'map': {}}
+          {'list':<dynamic>[], 'map':<String, dynamic>{}}
         ],
         'b': [
-          {'list': [], 'map': {}},
-          {'list': [], 'map': {}}
+          {'list':<dynamic>[], 'map':<String, dynamic>{}},
+          {'list':<dynamic>[], 'map':<String, dynamic>{}}
         ],
       },
     };

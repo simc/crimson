@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:crimson/crimson.dart';
 import 'package:test/test.dart';
@@ -148,8 +147,8 @@ void main() {
       final json = {
         'before': '123',
         'foo': [
-          {},
-          {},
+          <String, dynamic>{},
+          <String, dynamic>{},
           {'baz': 'a'}
         ],
         '2': {
@@ -193,8 +192,8 @@ void main() {
     test('empty field', () {
       final json = {
         'before': '123',
-        'foo': {},
-        '2': {},
+        'foo': <String, dynamic>{},
+        '2': <String, dynamic>{},
         'after': '456',
       };
       final obj = Crimson(bytes(json)).readPointerTest();
@@ -205,8 +204,8 @@ void main() {
 
       final json2 = {
         'before': '123',
-        'foo': {'2': []},
-        '2': {'foo': {}},
+        'foo': {'2': <dynamic>[]},
+        '2': {'foo': <String, dynamic>{},},
         'after': '456',
       };
       final obj2 = Crimson(bytes(json2)).readPointerTest();

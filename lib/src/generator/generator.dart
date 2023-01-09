@@ -5,6 +5,7 @@ import 'package:crimson/src/generator/class_decode.dart';
 import 'package:crimson/src/generator/class_encode.dart';
 import 'package:crimson/src/generator/enum_decode.dart';
 import 'package:crimson/src/generator/enum_encode.dart';
+import 'package:crimson/src/generator/from_json_ext.dart';
 import 'package:crimson/src/generator/util.dart';
 import 'package:source_gen/source_gen.dart';
 
@@ -17,7 +18,10 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
     BuildStep buildStep,
   ) {
     if (element is ClassElement) {
+      final jsonFactory = element.fromJsonFactory;
       return '''
+      ${jsonFactory != null ? generateFromJsonExt(jsonFactory) : ''}
+      
       extension Read${element.cleanName} on Crimson {
         ${generateClassDecode(element)}
 
@@ -32,7 +36,10 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
     } else if (element is EnumElement) {
       final field = annotation.read('enumField');
       final enumProperty = field.isNull ? 'name' : field.stringValue;
+      final jsonFactory = element.fromJsonFactory;
       return '''
+      ${jsonFactory != null ? generateFromJsonExt(jsonFactory) : ''}
+      
       extension Read${element.displayName} on Crimson {
         ${generateEnumDecode(element, enumProperty)}
 
