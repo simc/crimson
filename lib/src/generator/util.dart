@@ -45,6 +45,20 @@ extension ClassElementX on ClassElement {
     );
   }
 
+  String? get fromJsonFactory {
+    for (final ctor in constructors) {
+      if (ctor.isFactory && ctor.name == 'fromJson') {
+        final posParam = ctor.parameters.firstWhere((e) => e.isPositional);
+        if (posParam.type.toString() == 'List<int>' &&
+            posParam.displayName == 'buffer' //
+        ) {
+          return ctor.enclosingElement.displayName;
+        }
+      }
+    }
+    return null;
+  }
+
   ParameterElement? constructorParam(String name) {
     for (final param in jsonConstructor.parameters) {
       if (param.name == name) {
