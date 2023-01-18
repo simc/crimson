@@ -1,4 +1,3 @@
-
 /// @nodoc
 String generateFromFactoryCtorExt(String eleName, String ctorAbbr) {
   return '''
