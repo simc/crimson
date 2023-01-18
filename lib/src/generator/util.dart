@@ -45,6 +45,23 @@ extension ClassElementX on ClassElement {
     );
   }
 
+  NamedCtor? get fromFactoryCtor {
+    for (final ctor in constructors) {
+      if (ctor.isFactory && ctor.name.startsWith('from')) {
+        final paramName = ctor.name.replaceFirst('from', '').toLowerCase();
+        final posParam = ctor.parameters.firstWhere((e) => e.isPositional);
+        if (posParam.type.toString() == 'Uint8List' &&
+            posParam.displayName == paramName) {
+          return NamedCtor(
+            ctor.enclosingElement.displayName,
+            ctor.name.replaceFirst('from', ''),
+          );
+        }
+      }
+    }
+    return null;
+  }
+
   ParameterElement? constructorParam(String name) {
     for (final param in jsonConstructor.parameters) {
       if (param.name == name) {
@@ -153,6 +170,32 @@ extension ExecutableElementX on ExecutableElement {
       'Not sure how to support typeof $runtimeType',
     );
   }
+}
+
+extension InterfaceTypeX on InterfaceType {
+  NamedCtor? get fromFactoryCtor {
+    for (final ctor in constructors) {
+      if (ctor.isFactory && ctor.name.startsWith('from')) {
+        final paramName = ctor.name.replaceFirst('from', '').toLowerCase();
+        final posParam = ctor.parameters.firstWhere((e) => e.isPositional);
+        if (posParam.type.toString() == 'Uint8List' &&
+            posParam.displayName == paramName) {
+          return NamedCtor(
+            ctor.enclosingElement.displayName,
+            ctor.name.replaceFirst('from', ''),
+          );
+        }
+      }
+    }
+    return null;
+  }
+}
+
+class NamedCtor {
+  NamedCtor(this.className, this.ctorAbbr);
+
+  final String className;
+  final String ctorAbbr;
 }
 
 Never err(String msg, [Element? element]) {
