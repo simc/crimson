@@ -145,6 +145,7 @@ String _read(DartType type, bool nullable) {
   final orNull = nullable ? 'OrNull' : '';
   final skipNull = nullable ? 'skipNull() ? null : ' : '';
   if (type.hasFromCrimsonConstructor) {
+    // ignore: deprecated_member_use
     return '$skipNull ${type.name}.fromCrimson(this)';
   } else if (type.isDartCoreList || type.isDartCoreSet) {
     return '''
