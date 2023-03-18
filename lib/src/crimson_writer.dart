@@ -26,6 +26,96 @@ class CrimsonWriter {
     _buffer[_offset++] = byte;
   }
 
+  @pragma('vm:prefer-inline')
+  void _writeString(String value) {
+    _ensure(value.length + 2);
+    var offset = _offset;
+
+    _buffer[offset++] = tokenDoubleQuote;
+
+    var i = 0;
+    for (; i < value.length; i++) {
+      final char = value.codeUnitAt(i);
+      if (char < oneByteLimit && canDirectWrite[char]) {
+        _buffer[offset++] = char;
+      } else {
+        break;
+      }
+    }
+
+    if (i < value.length) {
+      _ensure((value.length - i) * 3 + 1);
+
+      for (; i < value.length; i++) {
+        final char = value.codeUnitAt(i);
+        if (char < oneByteLimit) {
+          if (canDirectWrite[char]) {
+            _buffer[offset++] = char;
+          } else {
+            switch (char) {
+              case tokenDoubleQuote:
+                _buffer[offset++] = tokenBackslash;
+                _buffer[offset++] = tokenDoubleQuote;
+                break;
+              case tokenBackslash:
+                _buffer[offset++] = tokenBackslash;
+                _buffer[offset++] = tokenBackslash;
+                break;
+              case tokenBackspace:
+                _buffer[offset++] = tokenBackslash;
+                _buffer[offset++] = tokenB;
+                break;
+              case tokenFormFeed:
+                _buffer[offset++] = tokenBackslash;
+                _buffer[offset++] = tokenF;
+                break;
+              case tokenLineFeed:
+                _buffer[offset++] = tokenBackslash;
+                _buffer[offset++] = tokenN;
+                break;
+              case tokenCarriageReturn:
+                _buffer[offset++] = tokenBackslash;
+                _buffer[offset++] = tokenR;
+                break;
+              case tokenTab:
+                _buffer[offset++] = tokenBackslash;
+                _buffer[offset++] = tokenT;
+                break;
+              default:
+                _buffer[offset++] = tokenBackslash;
+                _buffer[offset++] = tokenU;
+                _buffer[offset++] = tokenZero;
+                _buffer[offset++] = tokenZero;
+                _buffer[offset++] = hexDigits[(char >> 4) & 0xF];
+                _buffer[offset++] = hexDigits[char & 0xF];
+            }
+          }
+        } else if ((char & surrogateTagMask) == leadSurrogateMin) {
+          // combine surrogate pair
+          final nextChar = value.codeUnitAt(++i);
+          final rune = 0x10000 + ((char & surrogateValueMask) << 10) |
+              (nextChar & surrogateValueMask);
+          // If the rune is encoded with 2 code-units then it must be encoded
+          // with 4 bytes in UTF-8.
+          _buffer[offset++] = 0xF0 | (rune >> 18);
+          _buffer[offset++] = 0x80 | ((rune >> 12) & 0x3f);
+          _buffer[offset++] = 0x80 | ((rune >> 6) & 0x3f);
+          _buffer[offset++] = 0x80 | (rune & 0x3f);
+        } else if (char <= twoByteLimit) {
+          _buffer[offset++] = 0xC0 | (char >> 6);
+          _buffer[offset++] = 0x80 | (char & 0x3f);
+        } else {
+          _buffer[offset++] = 0xE0 | (char >> 12);
+          _buffer[offset++] = 0x80 | ((char >> 6) & 0x3f);
+          _buffer[offset++] = 0x80 | (char & 0x3f);
+        }
+      }
+    }
+
+    _buffer[offset++] = tokenDoubleQuote;
+    _offset = offset;
+  }
+
   /// Start a new JSON object.
   @pragma('vm:prefer-inline')
   void writeObjectStart() {
@@ -48,7 +138,7 @@ class CrimsonWriter {
   /// Write a JSON object key.
   @pragma('vm:prefer-inline')
   void writeObjectKey(String field) {
-    writeString(field);
+    _writeString(field);
     _writeByte(tokenColon);
   }
 
@@ -118,61 +208,8 @@ class CrimsonWriter {
   /// Write a string.
   @pragma('vm:prefer-inline')
   void writeString(String value) {
-    _ensure(value.length + 3);
-    var offset = _offset;
-
-    _buffer[offset++] = tokenDoubleQuote;
-
-    var i = 0;
-    for (; i < value.length; i++) {
-      final char = value.codeUnitAt(i);
-      if (char < oneByteLimit &&
-          char != tokenDoubleQuote &&
-          char != tokenBackslash) {
-        _buffer[offset++] = char;
-      } else {
-        break;
-      }
-    }
-
-    if (i < value.length) {
-      _ensure((value.length - i) * 3 + 2);
-
-      for (; i < value.length; i++) {
-        final char = value.codeUnitAt(i);
-        if (char < oneByteLimit &&
-            char != tokenDoubleQuote &&
-            char != tokenBackslash) {
-          _buffer[offset++] = char;
-        } else if (char == tokenDoubleQuote || char == tokenBackslash) {
-          _buffer[offset++] = tokenBackslash;
-          _buffer[offset++] = char;
-        } else if ((char & surrogateTagMask) == leadSurrogateMin) {
-          // combine surrogate pair
-          final nextChar = value.codeUnitAt(++i);
-          final rune = 0x10000 + ((char & surrogateValueMask) << 10) |
-              (nextChar & surrogateValueMask);
-          // If the rune is encoded with 2 code-units then it must be encoded
-          // with 4 bytes in UTF-8.
-          _buffer[offset++] = 0xF0 | (rune >> 18);
-          _buffer[offset++] = 0x80 | ((rune >> 12) & 0x3f);
-          _buffer[offset++] = 0x80 | ((rune >> 6) & 0x3f);
-          _buffer[offset++] = 0x80 | (rune & 0x3f);
-        } else if (char <= twoByteLimit) {
-          _buffer[offset++] = 0xC0 | (char >> 6);
-          _buffer[offset++] = 0x80 | (char & 0x3f);
-        } else {
-          _buffer[offset++] = 0xE0 | (char >> 12);
-          _buffer[offset++] = 0x80 | ((char >> 6) & 0x3f);
-          _buffer[offset++] = 0x80 | (char & 0x3f);
-        }
-      }
-    }
-
-    _buffer[offset++] = tokenDoubleQuote;
-    _buffer[offset++] = tokenComma;
-
-    _offset = offset;
+    _writeString(value);
+    _writeByte(tokenComma);
   }
 
   /// Write a number.

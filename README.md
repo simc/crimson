@@ -21,8 +21,6 @@
 
 <p align="center">Fast, efficient and easy-to-use JSON parser and serializer for Dart.<br>Crimson does not verify your JSON!</p>
 
-> 🚧 **Crimson is still in early development and is not ready for production use.** 🚧
-
 ## Features
 
 - 🏎️ **Fast**: Like really fast. Crimson parses JSON in a single pass.
@@ -129,6 +127,32 @@ enum PlaceType {
   country, // country
   largeCity, // large_city
   smallCity, // small_city
+}
+```
+
+## fromJson and toJson methods
+
+Crimson supports generating a `fromJson()` constructor and a `toJson()` extension method for your classes:
+
+Just add the following line to your class:
+
+```dart
+@json
+class Tweet {
+  // ...
+
+  factory Tweet.fromJson(Uint8List json) => _$TweetFromJson(json);
+}
+```
+
+Alternatively you can use `fromBytes()` and `toBytes()`:
+
+```dart
+@json
+class Tweet {
+  // ...
+
+  factory Tweet.fromBytes(Uint8List bytes) => _$TweetFromBytes(bytes);
 }
 ```
 

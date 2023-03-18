@@ -20,6 +20,8 @@ const tokenRBrace = 0x7D;
 
 const tokenA = 0x61;
 const tokenB = 0x62;
+const tokenC = 0x63;
+const tokenD = 0x64;
 const tokenE = 0x65;
 const tokenUpperE = 0x45;
 const tokenF = 0x66;
@@ -76,3 +78,31 @@ const surrogateValueMask = 0x3FF;
 const leadSurrogateMin = 0xD800;
 
 const maxInt = 9223372036854775807;
+
+const canDirectWrite = [
+  false, false, false, false, false, false, false, false, //
+  false, false, false, false, false, false, false, false, //
+  false, false, false, false, false, false, false, false, //
+  false, false, false, false, false, false, false, false, //
+
+  true, true, false /* " */, true, true, true, true, true, //
+  true, true, true, true, true, true, true, true, //
+  true, true, true, true, true, true, true, true, //
+  true, true, true, true, true, true, true, true, //
+
+  true, true, true, true, true, true, true, true, //
+  true, true, true, true, true, true, true, true, //
+  true, true, true, true, true, true, true, true, //
+  true, true, true, true, false /* \ */, true, true, true, //
+
+  true, true, true, true, true, true, true, true, //
+  true, true, true, true, true, true, true, true, //
+  true, true, true, true, true, true, true, true, //
+  true, true, true, true, true, true, true, true, //
+];
+
+const hexDigits = [
+  tokenZero, tokenOne, tokenTwo, tokenThree, tokenFour, //
+  tokenFive, tokenSix, tokenSeven, tokenEight, tokenNine, //
+  tokenA, tokenB, tokenC, tokenD, tokenE, tokenF, //
+];

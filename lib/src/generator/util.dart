@@ -45,21 +45,31 @@ extension ClassElementX on ClassElement {
     );
   }
 
-  NamedCtor? get fromFactoryCtor {
-    for (final ctor in constructors) {
-      if (ctor.isFactory && ctor.name.startsWith('from')) {
-        final paramName = ctor.name.replaceFirst('from', '').toLowerCase();
-        final posParam = ctor.parameters.firstWhere((e) => e.isPositional);
-        if (posParam.type.toString() == 'Uint8List' &&
-            posParam.displayName == paramName) {
-          return NamedCtor(
-            ctor.enclosingElement.displayName,
-            ctor.name.replaceFirst('from', ''),
-          );
+  bool hasFromConstructor(String name, String param) {
+    bool check(InterfaceType t, String name, String param) {
+      for (final c in t.constructors) {
+        if (c.name == name && c.parameters.length == 1) {
+          final posParam = c.parameters.firstWhere((e) => e.isPositional);
+          if (posParam.type.toString() == param) {
+            return true;
+          }
         }
       }
+      return false;
     }
-    return null;
+
+    // check if it's freezed class starting with _$_
+    if (isPrivate && displayName.startsWith(r'_$_')) {
+      // find super Type with == cleanName
+      final superType = allSupertypes.firstWhere((e) {
+        final display = e.getDisplayString(withNullability: false);
+        return display == cleanName;
+      });
+      // check for constructor
+      return check(superType, name, param);
+    } else {
+      return check(thisType, name, param);
+    }
   }
 
   ParameterElement? constructorParam(String name) {
@@ -85,20 +95,21 @@ extension DartTypeX on DartType {
     return nullabilitySuffix == NullabilitySuffix.question;
   }
 
-  DartType get listParam {
-    if (isDartCoreList) {
-      return (this as ParameterizedType).typeArguments.first;
+  bool get hasFromCrimsonConstructor {
+    final el = element;
+    if (el is ClassElement) {
+      return el.hasFromConstructor('fromCrimson', 'Crimson');
     } else {
-      throw Exception('Not a list');
+      return false;
     }
   }
 
+  DartType get listParam {
+    return (this as ParameterizedType).typeArguments.first;
+  }
+
   DartType get mapParam {
-    if (isDartCoreMap) {
-      return (this as ParameterizedType).typeArguments.last;
-    } else {
-      throw Exception('Not a map');
-    }
+    return (this as ParameterizedType).typeArguments.last;
   }
 }
 
@@ -146,6 +157,11 @@ extension PropertyInducingElementX on PropertyInducingElement {
     final ann = _convertChecker.firstAnnotationOf(nonSynthetic);
     return ann?.getField('fromJson')?.toFunctionValue();
   }
+
+  ExecutableElement? get toJson {
+    final ann = _convertChecker.firstAnnotationOf(nonSynthetic);
+    return ann?.getField('toJson')?.toFunctionValue();
+  }
 }
 
 extension ExecutableElementX on ExecutableElement {
@@ -170,32 +186,6 @@ extension ExecutableElementX on ExecutableElement {
       'Not sure how to support typeof $runtimeType',
     );
   }
-}
-
-extension InterfaceTypeX on InterfaceType {
-  NamedCtor? get fromFactoryCtor {
-    for (final ctor in constructors) {
-      if (ctor.isFactory && ctor.name.startsWith('from')) {
-        final paramName = ctor.name.replaceFirst('from', '').toLowerCase();
-        final posParam = ctor.parameters.firstWhere((e) => e.isPositional);
-        if (posParam.type.toString() == 'Uint8List' &&
-            posParam.displayName == paramName) {
-          return NamedCtor(
-            ctor.enclosingElement.displayName,
-            ctor.name.replaceFirst('from', ''),
-          );
-        }
-      }
-    }
-    return null;
-  }
-}
-
-class NamedCtor {
-  NamedCtor(this.className, this.ctorAbbr);
-
-  final String className;
-  final String ctorAbbr;
 }
 
 Never err(String msg, [Element? element]) {

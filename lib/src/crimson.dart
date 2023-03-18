@@ -401,8 +401,7 @@ class Crimson {
         _offset = i;
         _stringBuffer = strBuf;
         return String.fromCharCodes(strBuf, 0, si);
-      }
-      if (bc == tokenBackslash) {
+      } else if (bc == tokenBackslash) {
         final nextChar = buffer[i++];
         if (nextChar == tokenU) {
           bc = (_parseHexDigit(i++) << 12) +

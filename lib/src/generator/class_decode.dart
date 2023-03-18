@@ -16,9 +16,7 @@ String generateClassDecode(ClassElement element) {
       switch(iterObjectHash()) {
         case -1:
           break loop;
-
         ${_generateReadAccessors(element)}
-
         default:
           skip();
           break;
@@ -144,42 +142,41 @@ String _generateCreateObject(ClassElement cls) {
 }
 
 String _read(DartType type, bool nullable) {
-  var code = '';
   final orNull = nullable ? 'OrNull' : '';
   final skipNull = nullable ? 'skipNull() ? null : ' : '';
-  if (type.isDartCoreList || type.isDartCoreSet) {
-    code += '''
+  if (type.hasFromCrimsonConstructor) {
+    return '$skipNull ${type.name}.fromCrimson(this)';
+  } else if (type.isDartCoreList || type.isDartCoreSet) {
+    return '''
       $skipNull
       ${type.isDartCoreList ? '[' : '{'}
         for(;iterArray();)
           ${_read(type.listParam, type.listParam.isNullable)},
       ${type.isDartCoreList ? ']' : '}'}''';
   } else if (type.isDartCoreMap) {
-    code += '''
+    return '''
       $skipNull
       {
         for(var field = iterObject(); field != null; field = iterObject())
           field: ${_read(type.mapParam, type.mapParam.isNullable)},
       }''';
   } else if (type.isDartCoreDouble) {
-    code += 'readDouble$orNull()';
+    return 'readDouble$orNull()';
   } else if (type.isDartCoreInt) {
-    code += 'readInt$orNull()';
+    return 'readInt$orNull()';
   } else if (type.isDartCoreNum) {
-    code += 'readNum$orNull()';
+    return 'readNum$orNull()';
   } else if (type.isDartCoreString) {
-    code += 'readString$orNull()';
+    return 'readString$orNull()';
   } else if (type.isDynamic || type.isDartCoreBool) {
-    code += 'read()';
+    return 'read()';
   } else if (type.element?.name == 'DateTime') {
-    code += '$skipNull DateTime.parse(readString())';
+    return '$skipNull DateTime.parse(readString())';
   } else if (type.hasJsonAnnotation) {
-    code += '$skipNull read${type.element!.name}()';
+    return '$skipNull read${type.element!.name}()';
   } else {
-    code += '${type.element!.displayName}.fromJson(read())';
+    return '${type.element!.displayName}.fromJson(read())';
   }
-
-  return code;
 }
 
 List<dynamic> _pointer(String pointer) {

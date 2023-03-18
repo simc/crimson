@@ -1,3 +1,10 @@
+# 0.3.0
+
+- Support for `.fromJson()` and `.toJson()` methods
+- Support for `.fromBytes()` and `.toBytes()` methods
+- Support for `.fromCrimson()` and `.toCrimson()` methods
+- Fixes for encoding json
+
 # 0.2.1
 
 - Fixed decoding of long Strings

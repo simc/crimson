@@ -29,8 +29,17 @@ String _writeAccessor(ClassElement cls) {
     } else {
       code += "writeObjectKey('${accessor.jsonName}');";
     }
-    code += 'final ${accessor.name}Val = value.${accessor.name};';
-    code += _write('${accessor.name}Val', accessor.type);
+
+    final toJson = accessor.toJson;
+    final type = toJson?.returnType ?? accessor.type;
+
+    var value = 'value.${accessor.name}';
+    if (toJson != null) {
+      value = '${toJson.qualifiedName}($value)';
+    }
+
+    code += 'final ${accessor.name}Val = $value;';
+    code += _write('${accessor.name}Val', type);
   }
   return code;
 }
@@ -43,7 +52,9 @@ String _write(String name, DartType type) {
         writeNull();
       } else {''';
   }
-  if (type.isDartCoreList || type.isDartCoreSet) {
+  if (type.hasFromCrimsonConstructor) {
+    code += '$name.toCrimson(this);';
+  } else if (type.isDartCoreList || type.isDartCoreSet) {
     code += '''
       writeArrayStart();
       for (final value in $name) {

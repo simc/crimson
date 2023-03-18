@@ -5,7 +5,7 @@ import 'package:crimson/src/generator/class_decode.dart';
 import 'package:crimson/src/generator/class_encode.dart';
 import 'package:crimson/src/generator/enum_decode.dart';
 import 'package:crimson/src/generator/enum_encode.dart';
-import 'package:crimson/src/generator/from_ctor_ext.dart';
+import 'package:crimson/src/generator/from_factory.dart';
 import 'package:crimson/src/generator/util.dart';
 import 'package:source_gen/source_gen.dart';
 
@@ -18,20 +18,7 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
     BuildStep buildStep,
   ) {
     if (element is ClassElement) {
-      var fromCtor = element.fromFactoryCtor;
-      // check if it's freezed class starting with _$_
-      if (element.isPrivate && element.displayName.startsWith(r'_$_')) {
-        // find super Type with == cleanName
-        final superType = element.allSupertypes.firstWhere((e) {
-          final display = e.getDisplayString(withNullability: false);
-          return display == element.cleanName;
-        });
-        // check for fromBytes Factory constructor
-        fromCtor = superType.fromFactoryCtor;
-      }
       return '''
-      ${fromCtor != null ? generateFromFactoryCtorExt(fromCtor.className, fromCtor.ctorAbbr) : ''}
-
       extension Read${element.cleanName} on Crimson {
         ${generateClassDecode(element)}
 
@@ -42,7 +29,10 @@ class CrimsonGenerator extends GeneratorForAnnotation<Json> {
         ${generateClassEncode(element)}
 
         ${_generateListEncode(element.cleanName)}
-      }''';
+      }
+      
+      ${generateFromFactory(element)}
+      ''';
     } else if (element is EnumElement) {
       final field = annotation.read('enumField');
       final enumProperty = field.isNull ? 'name' : field.stringValue;
