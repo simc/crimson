@@ -132,9 +132,9 @@ enum PlaceType {
 
 ## fromJson and toJson methods
 
-Crimson supports generating a `fromJson()` constructor and a `toJson()` extension method for your classes:
+Crimson supports generating a `fromJson()` constructor and a `toJson()` extension method for your classes use `Uint8List`.
 
-Just add the following line to your class:
+Just add the following line to your class. The `.toJson()` method is generated using an extension.
 
 ```dart
 @json
@@ -145,7 +145,7 @@ class Tweet {
 }
 ```
 
-Alternatively you can use `fromBytes()` and `toBytes()`:
+Alternatively you can use `fromBytes()` and `toBytes()`. It's equivalent to `fromJson()` and `toJson()`.
 
 ```dart
 @json
