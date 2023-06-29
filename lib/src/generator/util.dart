@@ -92,7 +92,8 @@ extension DartTypeX on DartType {
   }
 
   bool get isNullable {
-    return nullabilitySuffix == NullabilitySuffix.question;
+    return nullabilitySuffix == NullabilitySuffix.question ||
+        this is DynamicType;
   }
 
   bool get hasFromCrimsonConstructor {

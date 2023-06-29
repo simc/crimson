@@ -78,7 +78,7 @@ String _write(String name, DartType type) {
     code += 'writeString($name);';
   } else if (type.isDartCoreBool) {
     code += 'writeBool($name);';
-  } else if (type.isDynamic) {
+  } else if (type is DynamicType) {
     code += 'write($name);';
   } else if (type.element?.name == 'DateTime') {
     code += 'writeString($name.toIso8601String());';

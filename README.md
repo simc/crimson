@@ -14,8 +14,8 @@
   <a href="https://app.codecov.io/gh/simc/crimson">
     <img src="https://img.shields.io/codecov/c/github/simc/crimson?logo=codecov&logoColor=fff&labelColor=333940">
   </a>
-  <a href="https://twitter.com/simonleier">
-    <img src="https://img.shields.io/twitter/follow/simonleier?style=flat&label=Follow&color=1DA1F2&labelColor=333940&logo=twitter&logoColor=fff">
+  <a href="https://twitter.com/simcdev">
+    <img src="https://img.shields.io/twitter/follow/simcdev?style=flat&label=Follow&color=1DA1F2&labelColor=333940&logo=twitter&logoColor=fff">
   </a>
 </p>
 

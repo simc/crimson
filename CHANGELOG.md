@@ -1,3 +1,8 @@
+# 0.3.1
+
+- Bump dependencies
+- Fix small issue with nullable `dynamic` values
+
 # 0.3.0
 
 - Support for `.fromJson()` and `.toJson()` methods
