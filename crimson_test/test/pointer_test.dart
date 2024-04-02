@@ -85,7 +85,7 @@ class PointerTest {
 }
 
 Uint8List bytes(Map<String, dynamic> json) {
-  return utf8.encode(jsonEncode(json)) as Uint8List;
+  return utf8.encode(jsonEncode(json));
 }
 
 const rfcJson = {

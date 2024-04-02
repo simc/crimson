@@ -67,22 +67,16 @@ class Crimson {
     switch (buffer[_offset++]) {
       case tokenDoubleQuote:
         _skipString();
-        break;
       case tokenT:
         _offset += 3;
-        break;
       case tokenF:
         _offset += 4;
-        break;
       case tokenN:
         _offset += 3;
-        break;
       case tokenLBracket:
         skipPartialArray();
-        break;
       case tokenLBrace:
         skipPartialObject();
-        break;
       default:
         _skipNumber();
         break;
@@ -145,10 +139,8 @@ class Crimson {
           _offset = i;
           _skipString();
           i = _offset;
-          break;
         case tokenLBracket: // If open symbol, increase level
           level++;
-          break;
         case tokenRBracket: // If close symbol, decrease level
           level--;
           // If we have returned to the original level, we're done
@@ -156,7 +148,6 @@ class Crimson {
             _offset = i;
             return;
           }
-          break;
       }
     }
   }
@@ -171,10 +162,8 @@ class Crimson {
           _offset = i;
           _skipString();
           i = _offset;
-          break;
         case tokenLBrace: // If open symbol, increase level
           level++;
-          break;
         case tokenRBrace: // If close symbol, decrease level
           level--;
 
@@ -183,7 +172,6 @@ class Crimson {
             _offset = i;
             return;
           }
-          break;
       }
     }
   }

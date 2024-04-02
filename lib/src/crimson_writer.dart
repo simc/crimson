@@ -56,31 +56,24 @@ class CrimsonWriter {
               case tokenDoubleQuote:
                 _buffer[offset++] = tokenBackslash;
                 _buffer[offset++] = tokenDoubleQuote;
-                break;
               case tokenBackslash:
                 _buffer[offset++] = tokenBackslash;
                 _buffer[offset++] = tokenBackslash;
-                break;
               case tokenBackspace:
                 _buffer[offset++] = tokenBackslash;
                 _buffer[offset++] = tokenB;
-                break;
               case tokenFormFeed:
                 _buffer[offset++] = tokenBackslash;
                 _buffer[offset++] = tokenF;
-                break;
               case tokenLineFeed:
                 _buffer[offset++] = tokenBackslash;
                 _buffer[offset++] = tokenN;
-                break;
               case tokenCarriageReturn:
                 _buffer[offset++] = tokenBackslash;
                 _buffer[offset++] = tokenR;
-                break;
               case tokenTab:
                 _buffer[offset++] = tokenBackslash;
                 _buffer[offset++] = tokenT;
-                break;
               default:
                 _buffer[offset++] = tokenBackslash;
                 _buffer[offset++] = tokenU;

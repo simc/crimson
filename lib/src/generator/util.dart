@@ -31,7 +31,7 @@ extension ClassElementX on ClassElement {
       ...accessors.map((e) => e.variable),
       for (final supertype in allSupertypes) ...[
         if (!supertype.isDartCoreObject)
-          ...supertype.accessors.map((e) => e.variable)
+          ...supertype.accessors.map((e) => e.variable),
       ],
     ]
         .where(
