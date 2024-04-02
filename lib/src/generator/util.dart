@@ -16,7 +16,13 @@ const TypeChecker _convertChecker = TypeChecker.fromRuntime(JsonConvert);
 extension ClassElementX on ClassElement {
   String get cleanName {
     // hack to fix freezed names
-    return displayName.replaceFirst(r'_$_', '');
+    if (displayName.startsWith(r'_$') && displayName.endsWith('Impl')) {
+      return displayName
+          .substring(0, name.length - 4) // remove Impl
+          .replaceFirst(r'_$', ''); // remove _$
+    }
+
+    return displayName;
   }
 
   List<PropertyInducingElement> get allAccessors {
