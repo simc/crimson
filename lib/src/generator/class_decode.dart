@@ -169,9 +169,7 @@ String _read(DartType type, bool nullable) {
     return 'readNum$orNull()';
   } else if (type.isDartCoreString) {
     return 'readString$orNull()';
-  } else if (type.isDartCoreBool) {
-    return 'read() == true';
-  } else if (type is DynamicType) {
+  } else if (type is DynamicType || type.isDartCoreBool) {
     return 'read()';
   } else if (type.element?.name == 'DateTime') {
     return '$skipNull DateTime.parse(readString())';

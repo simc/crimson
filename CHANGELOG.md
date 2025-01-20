@@ -1,4 +1,4 @@
-# 0.4.0
+# 0.4.0+1
 
 - Bump dependencies, to support latest analyzer
 - Fixed support for freezed classes and from factories
