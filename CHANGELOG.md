@@ -2,6 +2,7 @@
 
 - Bump dependencies, to support latest analyzer
 - Fixed support for freezed classes and from factories
+- Fixed bug with serialization of large Strings
 
 # 0.3.1
 

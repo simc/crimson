@@ -2,7 +2,6 @@
 
 import 'dart:math';
 import 'dart:typed_data';
-
 import 'package:crimson/src/consts.dart';
 
 /// A writer that writes JSON to a [Uint8List].
@@ -17,6 +16,7 @@ class CrimsonWriter {
       final bufferView = Uint8List.view(_buffer.buffer, 0, _offset);
       _buffers.add(bufferView);
       _buffer = Uint8List(max(size, _buffer.length) * 2);
+      _offset = 0;
     }
   }
 
@@ -44,8 +44,9 @@ class CrimsonWriter {
     }
 
     if (i < value.length) {
+      _offset = offset;
       _ensure((value.length - i) * 3 + 1);
-
+      offset = _offset;
       for (; i < value.length; i++) {
         final char = value.codeUnitAt(i);
         if (char < oneByteLimit) {

@@ -36,7 +36,7 @@ class FCFreezed with _$FCFreezed {
 
   factory FCFreezed.fromCrimson(Crimson c) {
     final map = c.read() as Map<String, dynamic>;
-    return FCFreezed(name: map['name'], age: map['age']);
+    return FCFreezed(name: map['name'] as String, age: map['age'] as int);
   }
 }
 
@@ -59,7 +59,7 @@ class FCModel {
 
   factory FCModel.fromCrimson(Crimson c) {
     final map = c.read() as Map<String, dynamic>;
-    return FCModel(map['name'], map['age']);
+    return FCModel(map['name'] as String, map['age'] as int);
   }
 
   void toCrimson(CrimsonWriter w) {
