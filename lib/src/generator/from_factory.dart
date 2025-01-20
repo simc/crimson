@@ -3,10 +3,21 @@ import 'package:crimson/src/generator/util.dart';
 
 /// @nodoc
 String generateFromFactory(ClassElement element) {
-  if (element.hasFromConstructor('fromJson', 'Uint8List')) {
-    return _generateExtension(element, 'Json');
-  } else if (element.hasFromConstructor('fromBytes', 'Uint8List')) {
-    return _generateExtension(element, 'Bytes');
+  var ele = element;
+  // check originalClass for freezed
+  if (element.displayName.startsWith(r'_$') &&
+      element.displayName.endsWith('Impl')) {
+    final interface = element.interfaces
+        .firstWhere((e) => e.element.displayName == '_${element.cleanName}');
+    final originalClass = interface.interfaces
+        .firstWhere((e) => e.element.displayName == element.cleanName);
+    ele = originalClass.element as ClassElement;
+  }
+
+  if (ele.hasFromConstructor('fromJson', 'Uint8List')) {
+    return _generateExtension(ele, 'Json');
+  } else if (ele.hasFromConstructor('fromBytes', 'Uint8List')) {
+    return _generateExtension(ele, 'Bytes');
   } else {
     return '';
   }

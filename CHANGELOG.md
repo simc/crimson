@@ -1,3 +1,8 @@
+# 0.4.0
+
+- Bump dependencies, to support latest analyzer
+- Fixed support for freezed classes and from factories
+
 # 0.3.1
 
 - Bump dependencies
@@ -33,7 +38,7 @@
 # 0.1.1
 
 - Fixed edge cases
-- Added verfication of data types
+- Added verification of data types
 - Minor performance improvements
 
 # 0.1.0
